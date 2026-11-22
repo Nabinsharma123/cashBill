@@ -44,8 +44,11 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
   totalQuantity,
   declaration = "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
 }) => {
+  const MIN_TABLE_ROWS = 8;
+  const emptyRowCount = Math.max(0, MIN_TABLE_ROWS - items.length);
+
   return (
-    <div className="invoice-document-root bg-white text-black font-sans leading-tight text-[13px] max-w-[800px] mx-auto p-4 select-none">
+    <div className="invoice-document-root bg-white text-black font-sans leading-tight text-[13px] w-full max-w-[800px] mx-auto p-4 select-none print:p-0 print:max-w-none">
       {/* Title */}
       <div className="text-center font-bold text-base tracking-wide uppercase py-2">
         {invoiceTitle}
@@ -67,30 +70,29 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
             </div>
             <div className="mt-2 text-[12.5px] space-y-0.5">
               <div>
-                <span className="font-semibold">GSTIN/UIN:</span> {companyGstin}
+                <span className="font-semibold inline-block w-24">GSTIN/UIN</span>:{" "}
+                <span className="font-medium">{companyGstin}</span>
               </div>
               <div>
-                <span className="font-semibold">State Name :</span> {companyState}
+                <span className="font-semibold inline-block w-24">State Name</span>:{" "}
+                <span className="font-medium">{companyState}</span>
               </div>
             </div>
           </div>
 
           {/* Invoice No. & Date */}
-          <div className="w-[42%] flex flex-col">
-            <div className="flex border-b border-black h-1/2">
-              <div className="w-1/2 p-2 border-r border-black">
-                <div className="text-[11px] text-gray-600">Invoice No.</div>
-                <div className="font-bold text-[13px] mt-0.5">{invoiceNo}</div>
+          <div className="w-[42%] flex flex-col justify-between">
+            <div className="flex h-full">
+              <div className="w-1/2 p-2.5 border-r border-black flex flex-col">
+                <div className="text-[11px] text-gray-600 font-medium">Invoice No.</div>
+                <div className="font-bold text-[13px] mt-1 text-black">{invoiceNo}</div>
               </div>
-              <div className="w-1/2 p-2">
-                <div className="text-[11px] text-gray-600">Dated</div>
-                <div className="font-semibold text-[13px] mt-0.5">
+              <div className="w-1/2 p-2.5 flex flex-col">
+                <div className="text-[11px] text-gray-600 font-medium">Dated</div>
+                <div className="font-semibold text-[13px] mt-1 text-black">
                   {formatDateDisplay(invoiceDate)}
                 </div>
               </div>
-            </div>
-            <div className="p-2 h-1/2 text-[11px] text-gray-400">
-              {/* Reference section matching standard GST bill layout */}
             </div>
           </div>
         </div>
@@ -106,11 +108,11 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           </div>
           <div className="mt-2 text-[12.5px] flex flex-col gap-0.5">
             <div>
-              <span className="font-semibold inline-block w-28">GSTIN/UIN</span>:{" "}
+              <span className="font-semibold inline-block w-24">GSTIN/UIN</span>:{" "}
               <span className="font-medium">{partyGstin}</span>
             </div>
             <div>
-              <span className="font-semibold inline-block w-28">State Name</span>:{" "}
+              <span className="font-semibold inline-block w-24">State Name</span>:{" "}
               <span className="font-medium">{partyState}</span>
             </div>
           </div>
@@ -124,10 +126,9 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 <th className="border-r border-black py-1.5 px-1 w-[6%] font-semibold">
                   Sl<br />No.
                 </th>
-                <th className="border-r border-black py-1.5 px-2 text-left w-[44%] font-semibold">
+                <th className="border-r border-black py-1.5 px-2 text-left w-[48%] font-semibold">
                   Description of Goods
                 </th>
-                <th className="border-r border-black py-1.5 px-1 w-[2%]"></th>
                 <th className="border-r border-black py-1.5 px-2 text-right w-[12%] font-semibold">
                   Quantity
                 </th>
@@ -137,7 +138,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 <th className="border-r border-black py-1.5 px-2 text-center w-[8%] font-semibold">
                   per
                 </th>
-                <th className="py-1.5 px-2 text-right w-[16%] font-semibold">
+                <th className="py-1.5 px-2 text-right w-[14%] font-semibold">
                   Amount
                 </th>
               </tr>
@@ -151,7 +152,6 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                   <td className="border-r border-black py-1 px-2 font-bold text-left uppercase">
                     {item.description}
                   </td>
-                  <td className="border-r border-black py-1 px-1"></td>
                   <td className="border-r border-black py-1 px-2 text-right font-medium">
                     {Number(item.quantity).toFixed(2)}
                   </td>
@@ -167,10 +167,9 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 </tr>
               ))}
 
-              {/* Natural spacing rows */}
-              {Array.from({ length: Math.max(0, 4 - items.length) }).map((_, i) => (
-                <tr key={"spacer-" + i} className="h-6">
-                  <td className="border-r border-black"></td>
+              {/* Natural spacing rows to preserve tall columnar structure */}
+              {Array.from({ length: emptyRowCount }).map((_, i) => (
+                <tr key={"spacer-" + i} className="h-7">
                   <td className="border-r border-black"></td>
                   <td className="border-r border-black"></td>
                   <td className="border-r border-black"></td>
@@ -180,18 +179,19 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 </tr>
               ))}
 
-              {/* Subtotal line */}
-              <tr className="border-t border-black/40">
-                <td className="border-r border-black"></td>
-                <td className="border-r border-black"></td>
-                <td className="border-r border-black"></td>
-                <td className="border-r border-black"></td>
-                <td className="border-r border-black"></td>
-                <td className="border-r border-black"></td>
-                <td className="py-1 px-2 text-right font-semibold border-b border-black/30">
-                  {formatINR(subtotal)}
-                </td>
-              </tr>
+              {/* Subtotal line (rendered when items exist) */}
+              {items.length > 0 && (
+                <tr className="text-[12px]">
+                  <td className="border-r border-black"></td>
+                  <td className="border-r border-black py-0.5 px-2 text-right font-medium text-gray-700"></td>
+                  <td className="border-r border-black"></td>
+                  <td className="border-r border-black"></td>
+                  <td className="border-r border-black"></td>
+                  <td className="py-0.5 px-2 text-right font-semibold border-t border-black/40">
+                    {formatINR(subtotal)}
+                  </td>
+                </tr>
+              )}
 
               {/* Dynamic GST Tax Rows */}
               {gstEntries.map((gst) => (
@@ -200,7 +200,6 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                   <td className="border-r border-black py-0.5 px-2 text-right font-bold italic">
                     {gst.type} {gst.rate}%
                   </td>
-                  <td className="border-r border-black"></td>
                   <td className="border-r border-black"></td>
                   <td className="border-r border-black py-0.5 px-2 text-right font-medium">
                     {gst.rate} %
@@ -221,7 +220,6 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 <td className="border-r border-black"></td>
                 <td className="border-r border-black"></td>
                 <td className="border-r border-black"></td>
-                <td className="border-r border-black"></td>
                 <td className="py-0.5 px-2 text-right font-semibold">
                   {Number(roundOff) >= 0 ? Number(roundOff).toFixed(2) : `(${Math.abs(Number(roundOff)).toFixed(2)})`}
                 </td>
@@ -233,7 +231,6 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 <td className="border-r border-black py-1.5 px-2 text-right">
                   Total
                 </td>
-                <td className="border-r border-black"></td>
                 <td className="border-r border-black py-1.5 px-2 text-right font-bold">
                   {Number(totalQuantity).toFixed(2)}
                 </td>
