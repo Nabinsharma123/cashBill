@@ -1,4 +1,4 @@
-import { GstType, GstRate, QuantityUnit, InvoiceTitle, TaxPreset } from "@/constants/enums";
+import { GstType, GstRate, InvoiceTitle, TaxPreset } from "@/constants/enums";
 
 export type TInvoiceSchema = {
   Doc: {
@@ -22,7 +22,6 @@ export type TInvoiceSchema = {
     roundOff: number;
     totalAmount: number;
     totalQuantity: number;
-    totalQuantityUnit: QuantityUnit;
     declaration: string;
     createdAt?: string;
   };
@@ -65,9 +64,8 @@ export type TInvoiceSchema = {
     roundOff: number;
     totalAmount: number;
     totalQuantity: number;
-    totalQuantityUnit: QuantityUnit;
     declaration: string;
   };
 };
 
-export { GstType, GstRate, QuantityUnit, InvoiceTitle, TaxPreset };
+export { GstType, GstRate, InvoiceTitle, TaxPreset };

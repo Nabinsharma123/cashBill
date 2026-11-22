@@ -1,6 +1,6 @@
 import React from "react";
 import { TInvoiceSchema } from "../schema";
-import { InvoiceTitle, QuantityUnit } from "@/constants/enums";
+import { InvoiceTitle } from "@/constants/enums";
 import { formatINR, formatDateDisplay } from "@/lib/utils";
 
 export interface InvoiceDocumentProps {
@@ -21,7 +21,6 @@ export interface InvoiceDocumentProps {
   roundOff: number;
   totalAmount: number;
   totalQuantity: number;
-  totalQuantityUnit: QuantityUnit;
   declaration?: string;
 }
 
@@ -43,7 +42,6 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
   roundOff,
   totalAmount,
   totalQuantity,
-  totalQuantityUnit,
   declaration = "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
 }) => {
   return (
@@ -237,7 +235,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 </td>
                 <td className="border-r border-black"></td>
                 <td className="border-r border-black py-1.5 px-2 text-right font-bold">
-                  {Number(totalQuantity).toFixed(2)} {totalQuantityUnit}
+                  {Number(totalQuantity).toFixed(2)}
                 </td>
                 <td className="border-r border-black"></td>
                 <td className="border-r border-black"></td>

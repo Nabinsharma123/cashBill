@@ -101,3 +101,11 @@ export enum AlertVariant {
   INFO = "info",
 }
 
+// 9. Invoice Preview Modal Modes
+export enum InvoiceModalMode {
+  PREVIEW = "Preview",
+  PREVIEW_WITH_SAVE = "previewWithSave",
+  PREVIEW_WITH_PRINT = "PreviewWithPrint",
+}
+
+

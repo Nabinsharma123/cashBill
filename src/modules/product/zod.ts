@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { stringSchema } from "@/lib/zod";
 
 export const productFormSchema = z.object({
-  name: z.string().min(2, "Product name must be at least 2 characters"),
-  tags: z.string().optional(),
+  name: stringSchema("Product name", 2, 200),
+  tags: stringSchema("Tags", 0, 200).optional(),
 });
 
 export type ProductFormSchemaType = z.infer<typeof productFormSchema>;

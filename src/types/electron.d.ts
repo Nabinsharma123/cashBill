@@ -18,7 +18,15 @@ export interface ElectronAPI {
   deleteProduct: (id: number) => Promise<{ success: boolean }>;
 
   // Invoices
-  getInvoices: () => Promise<any[]>;
+  getInvoices: (params?: { page?: number; limit?: number; search?: string }) => Promise<{
+    data: any[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalRevenue: number;
+    totalQuantity: number;
+  }>;
   getInvoiceById: (id: number) => Promise<any>;
   createInvoice: (data: any) => Promise<any>;
   deleteInvoice: (id: number) => Promise<{ success: boolean }>;

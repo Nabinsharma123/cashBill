@@ -9,7 +9,7 @@ import { useGetAllCompanies, useCreateCompany } from "@/modules/company/hooks";
 import { useGetAllParties, useCreateParty } from "@/modules/party/hooks";
 import { useGetAllProducts, useCreateProduct } from "@/modules/product/hooks";
 
-import { InvoiceDocument } from "../components/InvoiceDocument";
+import { InvoiceViewModal } from "../components/InvoiceViewModal";
 import { CompanyFormDialog } from "@/modules/company/components/CompanyFormDialog";
 import { PartyFormDialog } from "@/modules/party/components/PartyFormDialog";
 import { ProductFormDialog } from "@/modules/product/components/ProductFormDialog";
@@ -38,11 +38,8 @@ import {
 import {
   Plus,
   Trash2,
-  Printer,
-  Download,
   Save,
   Eye,
-  FileEdit,
   Building2,
   Package,
 } from "lucide-react";
@@ -53,11 +50,9 @@ import {
   GST_TYPE_OPTIONS,
   GstRate,
   GST_RATE_OPTIONS,
-  QuantityUnit,
-  QUANTITY_UNIT_OPTIONS,
   TaxPreset,
   TAX_PRESET_OPTIONS,
-  InvoiceTab,
+  InvoiceModalMode,
   AlertVariant,
 } from "@/constants/enums";
 
@@ -73,13 +68,16 @@ export const CreateInvoicePage: React.FC = () => {
   const createInvoiceMutation = useCreateInvoice();
   const { showAlert } = useAlert();
 
-  // Inline Dialog states
+  // Inline Quick Dialog states
   const [isCompDialogOpen, setIsCompDialogOpen] = useState(false);
   const [isPartyDialogOpen, setIsPartyDialogOpen] = useState(false);
   const [isProdDialogOpen, setIsProdDialogOpen] = useState(false);
 
-  // Tab View for desktop preview
-  const [activeTab, setActiveTab] = useState<InvoiceTab>(InvoiceTab.SPLIT);
+  // Invoice Preview Modal state
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<InvoiceModalMode>(InvoiceModalMode.PREVIEW);
+  const [previewInvoice, setPreviewInvoice] = useState<any>(null);
+  const [pendingSaveData, setPendingSaveData] = useState<InvoiceFormSchemaType | null>(null);
 
   // React Hook Form with Zod Schema
   const {
@@ -127,7 +125,6 @@ export const CreateInvoicePage: React.FC = () => {
         },
       ],
       roundOff: 0.4,
-      totalQuantityUnit: QuantityUnit.SET,
       declaration:
         "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
     },
@@ -335,37 +332,81 @@ export const CreateInvoicePage: React.FC = () => {
     }
   };
 
-  // Submit Handler
-  const onSubmit = async (data: InvoiceFormSchemaType) => {
+  // Build current invoice object from form state
+  const buildCurrentInvoiceData = (formData?: InvoiceFormSchemaType) => {
+    const vals = formData || formValues;
+    return {
+      invoiceNo: vals.invoiceNo || "DRAFT",
+      invoiceTitle: vals.invoiceTitle,
+      invoiceDate: vals.invoiceDate,
+      companyId: vals.companyId,
+      partyId: vals.partyId,
+      companyName: selectedCompany?.name || vals.companyName || "",
+      companyAddress: selectedCompany?.address || vals.companyAddress || "",
+      companyGstin: selectedCompany?.gstin || vals.companyGstin || "",
+      companyStateName: selectedCompany?.stateName || vals.companyStateName || "",
+      partyName: selectedParty?.name || vals.partyName || "",
+      partyAddress: selectedParty?.address || vals.partyAddress || "",
+      partyGstin: selectedParty?.gstin || vals.partyGstin || "",
+      partyStateName: selectedParty?.stateName || vals.partyStateName || "",
+      items: vals.items || watchedItems,
+      subtotal: subtotal,
+      gstEntries: vals.gstEntries || watchedGstEntries,
+      roundOff: Number(vals.roundOff ?? watchedRoundOff) || 0,
+      totalAmount: totalAmount,
+      totalQuantity: totalQuantity,
+      declaration: vals.declaration || "",
+    };
+  };
+
+  // 1. Preview button handler - opens in view-only mode
+  const handleOpenPreview = () => {
+    setPreviewInvoice(buildCurrentInvoiceData());
+    setModalMode(InvoiceModalMode.PREVIEW);
+    setIsViewModalOpen(true);
+  };
+
+  // 2. Save button handler - validates first, then opens modal with save action
+  const onFormValidForSave = (data: InvoiceFormSchemaType) => {
+    setPendingSaveData(data);
+    setPreviewInvoice(buildCurrentInvoiceData(data));
+    setModalMode(InvoiceModalMode.PREVIEW_WITH_SAVE);
+    setIsViewModalOpen(true);
+  };
+
+  // 3. Modal save execution
+  const handleModalSave = async () => {
+    if (!pendingSaveData) return;
     try {
       await createInvoiceMutation.mutateAsync({
-        invoiceNo: data.invoiceNo.trim(),
-        invoiceTitle: data.invoiceTitle,
-        invoiceDate: data.invoiceDate,
-        companyId: data.companyId,
-        partyId: data.partyId,
-        companyName: data.companyName,
-        companyAddress: data.companyAddress,
-        companyGstin: data.companyGstin,
-        companyStateName: data.companyStateName,
-        partyName: data.partyName,
-        partyAddress: data.partyAddress,
-        partyGstin: data.partyGstin,
-        partyStateName: data.partyStateName,
-        items: data.items,
+        invoiceNo: pendingSaveData.invoiceNo.trim(),
+        invoiceTitle: pendingSaveData.invoiceTitle,
+        invoiceDate: pendingSaveData.invoiceDate,
+        companyId: pendingSaveData.companyId,
+        partyId: pendingSaveData.partyId,
+        companyName: pendingSaveData.companyName,
+        companyAddress: pendingSaveData.companyAddress,
+        companyGstin: pendingSaveData.companyGstin,
+        companyStateName: pendingSaveData.companyStateName,
+        partyName: pendingSaveData.partyName,
+        partyAddress: pendingSaveData.partyAddress,
+        partyGstin: pendingSaveData.partyGstin,
+        partyStateName: pendingSaveData.partyStateName,
+        items: pendingSaveData.items,
         subtotal: subtotal,
-        gstEntries: data.gstEntries,
-        roundOff: Number(data.roundOff) || 0,
+        gstEntries: pendingSaveData.gstEntries,
+        roundOff: Number(pendingSaveData.roundOff) || 0,
         totalAmount: totalAmount,
         totalQuantity: totalQuantity,
-        totalQuantityUnit: data.totalQuantityUnit,
-        declaration: data.declaration || "",
+        declaration: pendingSaveData.declaration || "",
       });
       showAlert({
         title: "Invoice Created",
-        message: `Invoice #${data.invoiceNo} created and saved successfully!`,
+        message: `Invoice #${pendingSaveData.invoiceNo} saved successfully!`,
         variant: AlertVariant.SUCCESS,
       });
+      // Replace save button with print and download
+      setModalMode(InvoiceModalMode.PREVIEW_WITH_PRINT);
     } catch (err: any) {
       console.error("Failed to save invoice:", err);
       showAlert({
@@ -380,89 +421,41 @@ export const CreateInvoicePage: React.FC = () => {
   const selectedParty = parties.find((p) => p.id === watchedPartyId);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormValidForSave)} className="space-y-6">
       {/* Top Header & Actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Create Invoice</h1>
           <p className="text-muted-foreground mt-0.5">
-            Create proforma and tax invoices with instant live preview, print, and PDF export.
+            Create and save proforma and tax invoices with instant preview and PDF export.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Tab selector */}
-          <div className="flex rounded-md border bg-muted/40 p-1 text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setActiveTab(InvoiceTab.FORM)}
-              className={`px-3 py-1.5 rounded-sm transition-colors flex items-center gap-1.5 ${
-                activeTab === InvoiceTab.FORM
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <FileEdit className="h-3.5 w-3.5" /> Editor
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab(InvoiceTab.SPLIT)}
-              className={`hidden xl:flex px-3 py-1.5 rounded-sm transition-colors items-center gap-1.5 ${
-                activeTab === InvoiceTab.SPLIT
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Side-by-Side
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab(InvoiceTab.PREVIEW)}
-              className={`px-3 py-1.5 rounded-sm transition-colors flex items-center gap-1.5 ${
-                activeTab === InvoiceTab.PREVIEW
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Eye className="h-3.5 w-3.5" /> Preview
-            </button>
-          </div>
-
+        <div className="flex items-center gap-2">
+          {/* Preview button: opens preview modal with no print or download */}
           <Button
             type="button"
             variant="outline"
-            onClick={printCurrentInvoice}
+            onClick={handleOpenPreview}
             className="flex items-center gap-1.5"
           >
-            <Printer className="h-4 w-4" /> Print
+            <Eye className="h-4 w-4" /> Preview
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => exportPdf()}
-            className="flex items-center gap-1.5"
-          >
-            <Download className="h-4 w-4" /> Download PDF
-          </Button>
-
+          {/* Save button: validates form and opens modal with Save button */}
           <Button
             type="submit"
             disabled={isSubmitting || createInvoiceMutation.isPending}
             className="flex items-center gap-1.5"
           >
-            <Save className="h-4 w-4" />
-            {createInvoiceMutation.isPending ? "Saving..." : "Save Invoice"}
+            <Save className="h-4 w-4" /> Save Invoice
           </Button>
         </div>
       </div>
 
-      {/* Main Grid: Form / Preview */}
-      <div className={`grid gap-6 ${activeTab === InvoiceTab.SPLIT ? "xl:grid-cols-12" : "grid-cols-1"}`}>
-        {/* Editor Form Column */}
-        {(activeTab === InvoiceTab.FORM || activeTab === InvoiceTab.SPLIT) && (
-          <div className={`space-y-6 ${activeTab === InvoiceTab.SPLIT ? "xl:col-span-6" : "col-span-1"}`}>
-            {/* 1. Header & Organization Meta */}
+      {/* Main Form Fields */}
+      <div className="space-y-6">
+        {/* 1. Header & Organization Meta */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -897,8 +890,8 @@ export const CreateInvoicePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Round Off and Total Quantity Unit */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-3">
+                {/* Round Off */}
+                <div className="border-t pt-3 max-w-xs">
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
                       <Label htmlFor="round-off">Round Off (₹)</Label>
@@ -917,26 +910,6 @@ export const CreateInvoicePage: React.FC = () => {
                       {...register("roundOff", { valueAsNumber: true })}
                       className="font-mono text-right"
                     />
-                  </div>
-
-                  {/* Quantity Unit */}
-                  <div className="space-y-1.5">
-                    <Label>Total Quantity Unit *</Label>
-                    <Select
-                      value={formValues.totalQuantityUnit}
-                      onValueChange={(val: QuantityUnit) => setValue("totalQuantityUnit", val)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {QUANTITY_UNIT_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
 
@@ -961,7 +934,7 @@ export const CreateInvoicePage: React.FC = () => {
                   <div className="flex justify-between text-muted-foreground">
                     <span>Total Quantity:</span>
                     <span className="font-mono font-medium">
-                      {totalQuantity.toFixed(2)} {formValues.totalQuantityUnit}
+                      {totalQuantity.toFixed(2)}
                     </span>
                   </div>
                   <div className="border-t pt-2 mt-2 flex justify-between font-bold text-base text-foreground">
@@ -983,69 +956,24 @@ export const CreateInvoicePage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
-
-        {/* Live Preview Column */}
-        {(activeTab === InvoiceTab.PREVIEW || activeTab === InvoiceTab.SPLIT) && (
-          <div className={`${activeTab === InvoiceTab.SPLIT ? "xl:col-span-6" : "col-span-1"}`}>
-            <div className="sticky top-4">
-              <div className="rounded-xl border bg-card p-4 shadow-sm">
-                <div className="flex justify-between items-center mb-3 pb-2 border-b">
-                  <span className="font-semibold text-sm flex items-center gap-1.5">
-                    <Eye className="h-4 w-4 text-primary" />
-                    Exact Print / PDF Preview
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={printCurrentInvoice}
-                      className="h-8 text-xs"
-                    >
-                      <Printer className="h-3.5 w-3.5 mr-1" /> Print
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => exportPdf()}
-                      className="h-8 text-xs"
-                    >
-                      <Download className="h-3.5 w-3.5 mr-1" /> PDF
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Render the exact invoice document */}
-                <div className="border border-gray-200 rounded-md overflow-hidden bg-white shadow-inner">
-                  <InvoiceDocument
-                    invoiceTitle={formValues.invoiceTitle}
-                    invoiceNo={formValues.invoiceNo}
-                    invoiceDate={formValues.invoiceDate}
-                    companyName={selectedCompany?.name || ""}
-                    companyAddress={selectedCompany?.address || ""}
-                    companyGstin={selectedCompany?.gstin || ""}
-                    companyState={selectedCompany?.stateName || ""}
-                    partyName={selectedParty?.name || ""}
-                    partyAddress={selectedParty?.address || ""}
-                    partyGstin={selectedParty?.gstin || ""}
-                    partyState={selectedParty?.stateName || ""}
-                    items={watchedItems}
-                    subtotal={subtotal}
-                    gstEntries={watchedGstEntries}
-                    roundOff={watchedRoundOff}
-                    totalAmount={totalAmount}
-                    totalQuantity={totalQuantity}
-                    totalQuantityUnit={formValues.totalQuantityUnit}
-                    declaration={formValues.declaration}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Invoice Preview Modal (Preview, Preview with Save, Preview with Print) */}
+      <InvoiceViewModal
+        invoice={previewInvoice}
+        isOpen={isViewModalOpen}
+        type={modalMode}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          if (modalMode === InvoiceModalMode.PREVIEW_WITH_PRINT) {
+            setPendingSaveData(null);
+          }
+        }}
+        onSave={handleModalSave}
+        isSaving={createInvoiceMutation.isPending}
+        onPrint={printCurrentInvoice}
+        onExportPdf={exportPdf}
+      />
 
       {/* Inline Quick Creation Dialogs */}
       <CompanyFormDialog

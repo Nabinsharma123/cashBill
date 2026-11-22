@@ -1,7 +1,7 @@
 import { ipcMain, dialog, BrowserWindow } from "electron";
 import { getDrizzleDb } from "./database";
 import * as schema from "./db/schema";
-import { desc, eq } from "drizzle-orm";
+import { count, desc, eq, like, or, sum } from "drizzle-orm";
 import fs from "fs";
 
 export function registerIpcHandlers() {
@@ -92,8 +92,56 @@ export function registerIpcHandlers() {
   });
 
   // ==================== INVOICES ====================
-  ipcMain.handle("invoices:getAll", () => {
-    return db.select().from(schema.invoices).orderBy(desc(schema.invoices.id)).all();
+  ipcMain.handle("invoices:getAll", (_, params?: { page?: number; limit?: number; search?: string }) => {
+    const page = Math.max(1, Number(params?.page) || 1);
+    const limit = Math.max(1, Number(params?.limit) || 10);
+    const offset = (page - 1) * limit;
+    const search = params?.search?.trim();
+
+    let conditions = undefined;
+    if (search) {
+      const searchPattern = `%${search}%`;
+      conditions = or(
+        like(schema.invoices.invoiceNo, searchPattern),
+        like(schema.invoices.partyName, searchPattern),
+        like(schema.invoices.companyName, searchPattern),
+        like(schema.invoices.invoiceDate, searchPattern)
+      );
+    }
+
+    // Aggregate summary metrics across all matching invoices
+    const summaryQuery = db
+      .select({
+        total: count(),
+        totalRevenue: sum(schema.invoices.totalAmount),
+        totalQuantity: sum(schema.invoices.totalQuantity),
+      })
+      .from(schema.invoices);
+
+    const [summary] = conditions ? summaryQuery.where(conditions).all() : summaryQuery.all();
+    const total = summary?.total || 0;
+    const totalRevenue = Number(summary?.totalRevenue) || 0;
+    const totalQuantity = Number(summary?.totalQuantity) || 0;
+
+    // Fetch page records
+    const itemsQuery = db
+      .select()
+      .from(schema.invoices)
+      .orderBy(desc(schema.invoices.id))
+      .limit(limit)
+      .offset(offset);
+
+    const data = conditions ? itemsQuery.where(conditions).all() : itemsQuery.all();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+      totalRevenue,
+      totalQuantity,
+    };
   });
 
   ipcMain.handle("invoices:getById", (_, id: number) => {
@@ -135,7 +183,6 @@ export function registerIpcHandlers() {
       roundOff: Number(invoice.roundOff ?? invoice.round_off) || 0,
       totalAmount: Number(invoice.totalAmount ?? invoice.total_amount) || 0,
       totalQuantity: Number(invoice.totalQuantity ?? invoice.total_quantity) || 0,
-      totalQuantityUnit: invoice.totalQuantityUnit || invoice.total_quantity_unit,
       declaration: invoice.declaration || "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
     }).returning().get();
 

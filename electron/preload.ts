@@ -20,7 +20,7 @@ export const electronAPI = {
   deleteProduct: (id: number) => ipcRenderer.invoke("products:delete", id),
 
   // Invoices
-  getInvoices: () => ipcRenderer.invoke("invoices:getAll"),
+  getInvoices: (params?: { page?: number; limit?: number; search?: string }) => ipcRenderer.invoke("invoices:getAll", params),
   getInvoiceById: (id: number) => ipcRenderer.invoke("invoices:getById", id),
   createInvoice: (data: any) => ipcRenderer.invoke("invoices:create", data),
   deleteInvoice: (id: number) => ipcRenderer.invoke("invoices:delete", id),

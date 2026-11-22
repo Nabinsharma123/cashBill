@@ -106,11 +106,20 @@ function initTables(drizzleDb: BetterSQLite3Database<typeof schema>) {
       round_off REAL DEFAULT 0.0,
       total_amount REAL NOT NULL,
       total_quantity REAL NOT NULL,
-      total_quantity_unit TEXT NOT NULL CHECK(total_quantity_unit IN ('PCE', 'SET', 'BOX', 'BUNDLE')),
       declaration TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Migration: Drop total_quantity_unit column if it exists in legacy databases
+  try {
+    const cols = (drizzleDb as any).session.client.pragma("table_info(invoices)") as { name: string }[];
+    if (cols.some((c) => c.name === "total_quantity_unit")) {
+      (drizzleDb as any).session.client.prepare("ALTER TABLE invoices DROP COLUMN total_quantity_unit").run();
+    }
+  } catch (_e) {
+    // Ignore if table does not exist or column already dropped
+  }
 }
 
 function seedInitialData(drizzleDb: BetterSQLite3Database<typeof schema>) {

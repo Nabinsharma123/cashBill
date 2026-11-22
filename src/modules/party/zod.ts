@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { stringSchema } from "@/lib/zod";
 
 export const partyFormSchema = z.object({
-  name: z.string().min(2, "Party name must be at least 2 characters"),
-  address: z.string().min(3, "Address is required"),
-  gstin: z.string().min(15, "GSTIN must be 15 characters").max(15, "GSTIN must be 15 characters"),
-  stateName: z.string().min(2, "State name (and code) is required"),
+  name: stringSchema("Party name", 2, 200),
+  address: stringSchema("Address", 3, 500),
+  gstin: stringSchema("GSTIN", 15, 15),
+  stateName: stringSchema("State name", 2, 100),
 });
 
 export type PartyFormSchemaType = z.infer<typeof partyFormSchema>;

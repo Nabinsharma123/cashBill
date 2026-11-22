@@ -8,22 +8,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Save } from "lucide-react";
+import { InvoiceModalMode } from "@/constants/enums";
 
-interface InvoiceViewModalProps {
-  invoice: TInvoiceSchema["Doc"] | null;
+export { InvoiceModalMode };
+
+export interface InvoiceViewModalProps {
+  invoice: TInvoiceSchema["Doc"] | any | null;
   isOpen: boolean;
   onClose: () => void;
-  onPrint: () => void;
-  onExportPdf: (filename: string) => void;
+  type?: InvoiceModalMode | "Preview" | "previewWithSave" | "PreviewWithPrint";
+  onPrint?: () => void;
+  onExportPdf?: (filename: string) => void;
+  onSave?: () => Promise<void> | void;
+  isSaving?: boolean;
 }
 
 export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
   invoice,
   isOpen,
   onClose,
+  type = InvoiceModalMode.PREVIEW_WITH_PRINT,
   onPrint,
   onExportPdf,
+  onSave,
+  isSaving = false,
 }) => {
   if (!invoice) return null;
 
@@ -56,21 +65,72 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
             Invoice #{invoiceNo} Preview
           </DialogTitle>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onPrint}
-              className="h-8 text-xs flex items-center gap-1.5"
-            >
-              <Printer className="h-3.5 w-3.5" /> Print
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => onExportPdf(`Invoice_${invoiceNo.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`)}
-              className="h-8 text-xs flex items-center gap-1.5"
-            >
-              <Download className="h-3.5 w-3.5" /> PDF
-            </Button>
+            {/* Mode 1: Preview Only - no print, no download */}
+            {type === InvoiceModalMode.PREVIEW && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+                className="h-8 text-xs"
+              >
+                Close
+              </Button>
+            )}
+
+            {/* Mode 2: Preview with Save */}
+            {type === InvoiceModalMode.PREVIEW_WITH_SAVE && (
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onClose}
+                  disabled={isSaving}
+                  className="h-8 text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={onSave}
+                  disabled={isSaving}
+                  className="h-8 text-xs flex items-center gap-1.5"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  {isSaving ? "Saving..." : "Save Invoice"}
+                </Button>
+              </div>
+            )}
+
+            {/* Mode 3: Preview with Print & Download */}
+            {type === InvoiceModalMode.PREVIEW_WITH_PRINT && (
+              <div className="flex items-center gap-2">
+                {onPrint && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onPrint}
+                    className="h-8 text-xs flex items-center gap-1.5"
+                  >
+                    <Printer className="h-3.5 w-3.5" /> Print
+                  </Button>
+                )}
+                {onExportPdf && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() =>
+                      onExportPdf(`Invoice_${invoiceNo.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`)
+                    }
+                    className="h-8 text-xs flex items-center gap-1.5"
+                  >
+                    <Download className="h-3.5 w-3.5" /> PDF
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </DialogHeader>
 
@@ -93,7 +153,6 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
             roundOff={Number(inv.roundOff ?? inv.round_off) || 0}
             totalAmount={Number(inv.totalAmount ?? inv.total_amount) || 0}
             totalQuantity={Number(inv.totalQuantity ?? inv.total_quantity) || 0}
-            totalQuantityUnit={inv.totalQuantityUnit || inv.total_quantity_unit}
             declaration={inv.declaration}
           />
         </div>

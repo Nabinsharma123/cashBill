@@ -2,13 +2,61 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InvoiceQueryKeysEnum } from "./keys";
 import { TInvoiceSchema } from "./schema";
 
+export interface InvoicePaginationPayload {
+  page: number;
+  limit: number;
+  search?: string;
+}
+
+export interface PaginatedInvoicesResponse {
+  data: TInvoiceSchema["Doc"][];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  totalRevenue: number;
+  totalQuantity: number;
+}
+
+export const useGetPaginatedInvoices = (payload: InvoicePaginationPayload) => {
+  return useQuery({
+    queryKey: [InvoiceQueryKeysEnum.getAllInvoices, payload],
+    queryFn: async (): Promise<PaginatedInvoicesResponse> => {
+      if (window.electronAPI) {
+        const res = await window.electronAPI.getInvoices(payload);
+        return (
+          res || {
+            data: [],
+            total: 0,
+            page: payload.page,
+            limit: payload.limit,
+            totalPages: 1,
+            totalRevenue: 0,
+            totalQuantity: 0,
+          }
+        );
+      }
+      return {
+        data: [],
+        total: 0,
+        page: payload.page,
+        limit: payload.limit,
+        totalPages: 1,
+        totalRevenue: 0,
+        totalQuantity: 0,
+      };
+    },
+  });
+};
+
 export const useGetAllInvoices = () => {
   return useQuery({
     queryKey: [InvoiceQueryKeysEnum.getAllInvoices],
     queryFn: async (): Promise<TInvoiceSchema["Doc"][]> => {
       if (window.electronAPI) {
-        const data = await window.electronAPI.getInvoices();
-        return data || [];
+        const res = await window.electronAPI.getInvoices({ page: 1, limit: 10000 });
+        if (Array.isArray(res)) return res;
+        return res?.data || [];
       }
       return [];
     },

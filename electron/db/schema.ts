@@ -67,7 +67,6 @@ export const invoices = sqliteTable("invoices", {
   roundOff: real("round_off").default(0.0),
   totalAmount: real("total_amount").notNull(),
   totalQuantity: real("total_quantity").notNull(),
-  totalQuantityUnit: text("total_quantity_unit").notNull(),
   declaration: text("declaration"),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
