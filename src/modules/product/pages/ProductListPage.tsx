@@ -3,6 +3,7 @@ import { useGetAllProducts, useCreateProduct, useUpdateProduct, useDeleteProduct
 import { ProductFormDialog } from "../components/ProductFormDialog";
 import { TProductSchema } from "../schema";
 import { useAlert } from "@/context/AlertDialogContext";
+import { AlertVariant } from "@/constants/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -38,7 +39,7 @@ export const ProductListPage: React.FC = () => {
       title: "Delete Product",
       message: "Are you sure you want to delete this product? This action cannot be undone.",
       confirmText: "Delete",
-      variant: "destructive",
+      variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
         try {
           await deleteMutation.mutateAsync(id);
@@ -46,7 +47,7 @@ export const ProductListPage: React.FC = () => {
           showAlert({
             title: "Delete Failed",
             message: err.message || String(err),
-            variant: "destructive",
+            variant: AlertVariant.DESTRUCTIVE,
           });
         }
       },

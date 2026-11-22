@@ -3,6 +3,7 @@ import { useGetAllCompanies, useCreateCompany, useUpdateCompany, useDeleteCompan
 import { CompanyFormDialog } from "../components/CompanyFormDialog";
 import { TCompanySchema } from "../schema";
 import { useAlert } from "@/context/AlertDialogContext";
+import { AlertVariant } from "@/constants/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -38,7 +39,7 @@ export const CompanyListPage: React.FC = () => {
       title: "Delete Company",
       message: "Are you sure you want to delete this company? This action cannot be undone.",
       confirmText: "Delete",
-      variant: "destructive",
+      variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
         try {
           await deleteMutation.mutateAsync(id);
@@ -46,7 +47,7 @@ export const CompanyListPage: React.FC = () => {
           showAlert({
             title: "Delete Failed",
             message: err.message || String(err),
-            variant: "destructive",
+            variant: AlertVariant.DESTRUCTIVE,
           });
         }
       },

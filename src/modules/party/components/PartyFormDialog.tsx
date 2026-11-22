@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { partyFormSchema, PartyFormSchemaType } from "../zod";
 import { TPartySchema } from "../schema";
 import { useAlert } from "@/context/AlertDialogContext";
+import { AlertVariant } from "@/constants/enums";
 import {
   Dialog,
   DialogContent,
@@ -79,7 +80,7 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
       showAlert({
         title: "Error Saving Party",
         message: err.message || String(err),
-        variant: "destructive",
+        variant: AlertVariant.DESTRUCTIVE,
       });
     }
   };

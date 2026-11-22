@@ -8,15 +8,9 @@ import {
   Users,
 } from "lucide-react";
 import React from "react";
+import { NavTab } from "@/constants/enums";
 
-// export type NavTab = "create-invoice" | "invoice-history" | "companies" | "parties" | "products";
-export enum NavTab {
-  CREATE_INVOICE = "create-invoice",
-  INVOICE_HISTORY = "invoice-history",
-  COMPANIES = "companies",
-  PARTIES = "parties",
-  PRODUCTS = "products",
-}
+export { NavTab };
 
 interface AppLayoutProps {
   activeTab: NavTab;

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { productFormSchema, ProductFormSchemaType } from "../zod";
 import { TProductSchema } from "../schema";
 import { useAlert } from "@/context/AlertDialogContext";
+import { AlertVariant } from "@/constants/enums";
 import {
   Dialog,
   DialogContent,
@@ -66,7 +67,7 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
       showAlert({
         title: "Error Saving Product",
         message: err.message || String(err),
-        variant: "destructive",
+        variant: AlertVariant.DESTRUCTIVE,
       });
     }
   };

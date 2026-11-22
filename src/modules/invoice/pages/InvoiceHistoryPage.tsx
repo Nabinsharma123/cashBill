@@ -15,6 +15,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { formatINR, formatDateDisplay } from "@/lib/utils";
+import { AlertVariant } from "@/constants/enums";
 import {
   Search,
   FileText,
@@ -93,20 +94,20 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
           showAlert({
             title: "PDF Exported",
             message: `Invoice PDF successfully exported to:\n${res.filePath}`,
-            variant: "success",
+            variant: AlertVariant.SUCCESS,
           });
         } else if (!res.canceled) {
           showAlert({
             title: "Export Failed",
             message: res.error || "Unknown error occurred while generating PDF.",
-            variant: "destructive",
+            variant: AlertVariant.DESTRUCTIVE,
           });
         }
       } else {
         showAlert({
           title: "Feature Unavailable",
           message: "Native PDF export is available in the desktop app.",
-          variant: "info",
+          variant: AlertVariant.INFO,
         });
       }
     } catch (err: any) {
@@ -114,7 +115,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
       showAlert({
         title: "Export Error",
         message: err.message || String(err),
-        variant: "destructive",
+        variant: AlertVariant.DESTRUCTIVE,
       });
     }
   };
@@ -124,7 +125,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
       title: "Delete Invoice",
       message: "Are you sure you want to delete this invoice? This action cannot be undone.",
       confirmText: "Delete",
-      variant: "destructive",
+      variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
         try {
           await deleteInvoiceMutation.mutateAsync(id);
@@ -133,7 +134,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
           showAlert({
             title: "Delete Failed",
             message: err.message || String(err),
-            variant: "destructive",
+            variant: AlertVariant.DESTRUCTIVE,
           });
         }
       },

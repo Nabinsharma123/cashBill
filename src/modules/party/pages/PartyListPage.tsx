@@ -3,6 +3,7 @@ import { useGetAllParties, useCreateParty, useUpdateParty, useDeleteParty } from
 import { PartyFormDialog } from "../components/PartyFormDialog";
 import { TPartySchema } from "../schema";
 import { useAlert } from "@/context/AlertDialogContext";
+import { AlertVariant } from "@/constants/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -38,7 +39,7 @@ export const PartyListPage: React.FC = () => {
       title: "Delete Buyer Party",
       message: "Are you sure you want to delete this buyer party? This action cannot be undone.",
       confirmText: "Delete",
-      variant: "destructive",
+      variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
         try {
           await deleteMutation.mutateAsync(id);
@@ -46,7 +47,7 @@ export const PartyListPage: React.FC = () => {
           showAlert({
             title: "Delete Failed",
             message: err.message || String(err),
-            variant: "destructive",
+            variant: AlertVariant.DESTRUCTIVE,
           });
         }
       },

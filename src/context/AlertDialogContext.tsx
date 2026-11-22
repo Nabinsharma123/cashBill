@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { AlertVariant } from "@/constants/enums";
 
-export type AlertVariant = "warning" | "destructive" | "success" | "info";
+export { AlertVariant };
 
 export interface AlertOptions {
   title?: string;
@@ -41,7 +42,7 @@ export const AlertDialogProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [isConfirm, setIsConfirm] = useState(false);
   const [title, setTitle] = useState("Alert");
   const [message, setMessage] = useState("");
-  const [variant, setVariant] = useState<AlertVariant>("warning");
+  const [variant, setVariant] = useState<AlertVariant>(AlertVariant.WARNING);
   const [confirmText, setConfirmText] = useState("OK");
   const [cancelText, setCancelText] = useState("Cancel");
   const [onConfirmCallback, setOnConfirmCallback] = useState<(() => Promise<void> | void) | null>(null);
@@ -52,21 +53,21 @@ export const AlertDialogProvider: React.FC<{ children: ReactNode }> = ({ childre
     if (typeof options === "string") {
       setTitle("Notice");
       setMessage(options);
-      setVariant("warning");
+      setVariant(AlertVariant.WARNING);
       setConfirmText("OK");
     } else {
       setTitle(
         options.title ||
-          (options.variant === "success"
+          (options.variant === AlertVariant.SUCCESS
             ? "Success"
-            : options.variant === "destructive"
+            : options.variant === AlertVariant.DESTRUCTIVE
             ? "Error"
-            : options.variant === "info"
+            : options.variant === AlertVariant.INFO
             ? "Information"
             : "Warning")
       );
       setMessage(options.message);
-      setVariant(options.variant || "warning");
+      setVariant(options.variant || AlertVariant.WARNING);
       setConfirmText(options.confirmText || "OK");
     }
     setIsConfirm(false);
@@ -78,7 +79,7 @@ export const AlertDialogProvider: React.FC<{ children: ReactNode }> = ({ childre
   const showConfirm = (options: ConfirmOptions) => {
     setTitle(options.title || "Confirm Action");
     setMessage(options.message);
-    setVariant(options.variant || "destructive");
+    setVariant(options.variant || AlertVariant.DESTRUCTIVE);
     setConfirmText(options.confirmText || "Confirm");
     setCancelText(options.cancelText || "Cancel");
     setOnConfirmCallback(() => options.onConfirm || null);
@@ -110,13 +111,13 @@ export const AlertDialogProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const getIcon = () => {
     switch (variant) {
-      case "destructive":
+      case AlertVariant.DESTRUCTIVE:
         return <AlertCircle className="h-6 w-6 text-destructive shrink-0" />;
-      case "success":
+      case AlertVariant.SUCCESS:
         return <CheckCircle2 className="h-6 w-6 text-green-600 shrink-0" />;
-      case "info":
+      case AlertVariant.INFO:
         return <Info className="h-6 w-6 text-blue-600 shrink-0" />;
-      case "warning":
+      case AlertVariant.WARNING:
       default:
         return <AlertTriangle className="h-6 w-6 text-amber-500 shrink-0" />;
     }

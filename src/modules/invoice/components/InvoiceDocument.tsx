@@ -1,6 +1,6 @@
 import React from "react";
 import { TInvoiceSchema } from "../schema";
-import { QuantityUnit } from "@/constants/enums";
+import { InvoiceTitle, QuantityUnit } from "@/constants/enums";
 import { formatINR, formatDateDisplay } from "@/lib/utils";
 
 export interface InvoiceDocumentProps {
@@ -26,7 +26,7 @@ export interface InvoiceDocumentProps {
 }
 
 export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
-  invoiceTitle = "PROFORMA INVOICE",
+  invoiceTitle = InvoiceTitle.PROFORMA,
   invoiceNo,
   invoiceDate,
   companyName,

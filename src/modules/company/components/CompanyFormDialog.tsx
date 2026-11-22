@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { companyFormSchema, CompanyFormSchemaType } from "../zod";
 import { TCompanySchema } from "../schema";
 import { useAlert } from "@/context/AlertDialogContext";
+import { AlertVariant } from "@/constants/enums";
 import {
   Dialog,
   DialogContent,
@@ -79,7 +80,7 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
       showAlert({
         title: "Error Saving Company",
         message: err.message || String(err),
-        variant: "destructive",
+        variant: AlertVariant.DESTRUCTIVE,
       });
     }
   };

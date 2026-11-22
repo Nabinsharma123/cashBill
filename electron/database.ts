@@ -31,7 +31,7 @@ export function getDatabase(): Database.Database {
   drizzleDb = drizzle(instance, { schema });
 
   initTables(drizzleDb);
-  // seedInitialData(drizzleDb);
+  seedInitialData(drizzleDb);
 
   return db;
 }

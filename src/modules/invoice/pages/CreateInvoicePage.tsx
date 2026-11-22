@@ -57,6 +57,8 @@ import {
   QUANTITY_UNIT_OPTIONS,
   TaxPreset,
   TAX_PRESET_OPTIONS,
+  InvoiceTab,
+  AlertVariant,
 } from "@/constants/enums";
 
 export const CreateInvoicePage: React.FC = () => {
@@ -76,8 +78,8 @@ export const CreateInvoicePage: React.FC = () => {
   const [isPartyDialogOpen, setIsPartyDialogOpen] = useState(false);
   const [isProdDialogOpen, setIsProdDialogOpen] = useState(false);
 
-  // Tab View for desktop preview: 'form' | 'preview' | 'split'
-  const [activeTab, setActiveTab] = useState<"form" | "preview" | "split">("split");
+  // Tab View for desktop preview
+  const [activeTab, setActiveTab] = useState<InvoiceTab>(InvoiceTab.SPLIT);
 
   // React Hook Form with Zod Schema
   const {
@@ -307,20 +309,20 @@ export const CreateInvoicePage: React.FC = () => {
           showAlert({
             title: "PDF Exported",
             message: `Invoice PDF successfully exported to:\n${res.filePath}`,
-            variant: "success",
+            variant: AlertVariant.SUCCESS,
           });
         } else if (!res.canceled) {
           showAlert({
             title: "Export Failed",
             message: res.error || "Unknown error occurred while generating PDF.",
-            variant: "destructive",
+            variant: AlertVariant.DESTRUCTIVE,
           });
         }
       } else {
         showAlert({
           title: "Feature Unavailable",
           message: "Native PDF export is available in the desktop app.",
-          variant: "info",
+          variant: AlertVariant.INFO,
         });
       }
     } catch (err: any) {
@@ -328,7 +330,7 @@ export const CreateInvoicePage: React.FC = () => {
       showAlert({
         title: "Export Error",
         message: err.message || String(err),
-        variant: "destructive",
+        variant: AlertVariant.DESTRUCTIVE,
       });
     }
   };
@@ -362,14 +364,14 @@ export const CreateInvoicePage: React.FC = () => {
       showAlert({
         title: "Invoice Created",
         message: `Invoice #${data.invoiceNo} created and saved successfully!`,
-        variant: "success",
+        variant: AlertVariant.SUCCESS,
       });
     } catch (err: any) {
       console.error("Failed to save invoice:", err);
       showAlert({
         title: "Failed to Save Invoice",
         message: err.message || "Unknown error occurred while saving invoice.",
-        variant: "destructive",
+        variant: AlertVariant.DESTRUCTIVE,
       });
     }
   };
@@ -393,9 +395,9 @@ export const CreateInvoicePage: React.FC = () => {
           <div className="flex rounded-md border bg-muted/40 p-1 text-xs font-medium">
             <button
               type="button"
-              onClick={() => setActiveTab("form")}
+              onClick={() => setActiveTab(InvoiceTab.FORM)}
               className={`px-3 py-1.5 rounded-sm transition-colors flex items-center gap-1.5 ${
-                activeTab === "form"
+                activeTab === InvoiceTab.FORM
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
@@ -404,9 +406,9 @@ export const CreateInvoicePage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("split")}
+              onClick={() => setActiveTab(InvoiceTab.SPLIT)}
               className={`hidden xl:flex px-3 py-1.5 rounded-sm transition-colors items-center gap-1.5 ${
-                activeTab === "split"
+                activeTab === InvoiceTab.SPLIT
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
@@ -415,9 +417,9 @@ export const CreateInvoicePage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("preview")}
+              onClick={() => setActiveTab(InvoiceTab.PREVIEW)}
               className={`px-3 py-1.5 rounded-sm transition-colors flex items-center gap-1.5 ${
-                activeTab === "preview"
+                activeTab === InvoiceTab.PREVIEW
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
@@ -456,10 +458,10 @@ export const CreateInvoicePage: React.FC = () => {
       </div>
 
       {/* Main Grid: Form / Preview */}
-      <div className={`grid gap-6 ${activeTab === "split" ? "xl:grid-cols-12" : "grid-cols-1"}`}>
+      <div className={`grid gap-6 ${activeTab === InvoiceTab.SPLIT ? "xl:grid-cols-12" : "grid-cols-1"}`}>
         {/* Editor Form Column */}
-        {(activeTab === "form" || activeTab === "split") && (
-          <div className={`space-y-6 ${activeTab === "split" ? "xl:col-span-6" : "col-span-1"}`}>
+        {(activeTab === InvoiceTab.FORM || activeTab === InvoiceTab.SPLIT) && (
+          <div className={`space-y-6 ${activeTab === InvoiceTab.SPLIT ? "xl:col-span-6" : "col-span-1"}`}>
             {/* 1. Header & Organization Meta */}
             <Card>
               <CardHeader className="pb-3">
@@ -985,8 +987,8 @@ export const CreateInvoicePage: React.FC = () => {
         )}
 
         {/* Live Preview Column */}
-        {(activeTab === "preview" || activeTab === "split") && (
-          <div className={`${activeTab === "split" ? "xl:col-span-6" : "col-span-1"}`}>
+        {(activeTab === InvoiceTab.PREVIEW || activeTab === InvoiceTab.SPLIT) && (
+          <div className={`${activeTab === InvoiceTab.SPLIT ? "xl:col-span-6" : "col-span-1"}`}>
             <div className="sticky top-4">
               <div className="rounded-xl border bg-card p-4 shadow-sm">
                 <div className="flex justify-between items-center mb-3 pb-2 border-b">

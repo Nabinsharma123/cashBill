@@ -76,3 +76,28 @@ export const TAX_PRESET_OPTIONS = [
   { value: TaxPreset.CGST_SGST_9, label: "CGST 9% + SGST 9% (Intra-State)" },
   { value: TaxPreset.CUSTOM, label: "Custom GST Entries" },
 ] as const;
+
+// 6. Navigation Tabs
+export enum NavTab {
+  CREATE_INVOICE = "create-invoice",
+  INVOICE_HISTORY = "invoice-history",
+  COMPANIES = "companies",
+  PARTIES = "parties",
+  PRODUCTS = "products",
+}
+
+// 7. Invoice View Tabs (Editor layout)
+export enum InvoiceTab {
+  FORM = "form",
+  PREVIEW = "preview",
+  SPLIT = "split",
+}
+
+// 8. Alert Dialog Variants
+export enum AlertVariant {
+  WARNING = "warning",
+  DESTRUCTIVE = "destructive",
+  SUCCESS = "success",
+  INFO = "info",
+}
+
