@@ -2,5 +2,6 @@ node_modules
 database/cashbill.db-shm
 database/cashbill.db-wal
 dist
+dist-electron
 
 
