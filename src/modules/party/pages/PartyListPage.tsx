@@ -16,6 +16,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus, Search, Users, Pencil, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export const PartyListPage: React.FC = () => {
   const { data: parties = [], isLoading } = useGetAllParties();
@@ -56,26 +57,22 @@ export const PartyListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Users className="h-8 w-8 text-primary" />
-            Parties (Buyers)
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your buyers, distributors, and customer directory.
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setSelectedParty(null);
-            setIsDialogOpen(true);
-          }}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" /> Add Party
-        </Button>
-      </div>
+      <PageHeader
+        title="Parties (Buyers)"
+        description="Manage your buyers, distributors, and customer directory."
+        icon={Users}
+        actions={
+          <Button
+            onClick={() => {
+              setSelectedParty(null);
+              setIsDialogOpen(true);
+            }}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add Party
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader className="pb-3">

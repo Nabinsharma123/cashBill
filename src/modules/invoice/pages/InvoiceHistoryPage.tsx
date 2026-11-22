@@ -3,6 +3,7 @@ import { useGetPaginatedInvoices, useDeleteInvoice } from "../hooks";
 import { TInvoiceSchema } from "../schema";
 import { InvoiceViewModal } from "../components/InvoiceViewModal";
 import { TableFooter } from "@/components/table/TableFooter";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { usePaginationPayload } from "@/hooks/use-pagination-payload";
 import { useAlert } from "@/context/AlertDialogContext";
 import { Button } from "@/components/ui/button";
@@ -26,9 +27,6 @@ import {
   Download,
   Trash2,
   Plus,
-  TrendingUp,
-  Receipt,
-  Boxes,
 } from "lucide-react";
 
 interface InvoiceHistoryPageProps {
@@ -52,8 +50,6 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
   const invoices = paginationData?.data || [];
   const totalInvoices = paginationData?.total || 0;
   const totalPages = paginationData?.totalPages || 1;
-  const totalRevenue = paginationData?.totalRevenue || 0;
-  const totalQty = paginationData?.totalQuantity || 0;
 
   const [selectedInvoice, setSelectedInvoice] = useState<TInvoiceSchema["Doc"] | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -136,57 +132,16 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <FileText className="h-8 w-8 text-primary" />
-            Invoice History
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Browse, view, print, and export all generated proforma and tax invoices.
-          </p>
-        </div>
-        <Button onClick={onNavigateCreate} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Create New Invoice
-        </Button>
-      </div>
-
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalInvoices}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">Recorded in SQLite database</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Invoiced Amount</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">₹ {formatINR(totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">Cumulative billing value</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Quantity Shipped</CardTitle>
-            <Boxes className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalQty.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground mt-0.5">Cumulative product units</p>
-          </CardContent>
-        </Card>
-      </div>
+      <PageHeader
+        title="Invoice History"
+        description="Browse, view, print, and export all generated proforma and tax invoices."
+        icon={FileText}
+        actions={
+          <Button onClick={onNavigateCreate} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Create New Invoice
+          </Button>
+        }
+      />
 
       {/* Data Table */}
       <Card>

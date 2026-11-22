@@ -24,8 +24,6 @@ export interface ElectronAPI {
     page: number;
     limit: number;
     totalPages: number;
-    totalRevenue: number;
-    totalQuantity: number;
   }>;
   getInvoiceById: (id: number) => Promise<any>;
   createInvoice: (data: any) => Promise<any>;

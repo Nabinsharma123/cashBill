@@ -16,6 +16,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus, Search, Building2, Pencil, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export const CompanyListPage: React.FC = () => {
   const { data: companies = [], isLoading } = useGetAllCompanies();
@@ -56,26 +57,22 @@ export const CompanyListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Building2 className="h-8 w-8 text-primary" />
-            Companies
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your manufacturing entities and issuing company profiles.
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setSelectedCompany(null);
-            setIsDialogOpen(true);
-          }}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" /> Add Company
-        </Button>
-      </div>
+      <PageHeader
+        title="Companies"
+        description="Manage your manufacturing entities and issuing company profiles."
+        icon={Building2}
+        actions={
+          <Button
+            onClick={() => {
+              setSelectedCompany(null);
+              setIsDialogOpen(true);
+            }}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add Company
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader className="pb-3">

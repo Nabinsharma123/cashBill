@@ -17,6 +17,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus, Search, Package, Pencil, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export const ProductListPage: React.FC = () => {
   const { data: products = [], isLoading } = useGetAllProducts();
@@ -56,26 +57,22 @@ export const ProductListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Package className="h-8 w-8 text-primary" />
-            Products
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage manufactured goods, item descriptions, and search tags.
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setSelectedProduct(null);
-            setIsDialogOpen(true);
-          }}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" /> Add Product
-        </Button>
-      </div>
+      <PageHeader
+        title="Products"
+        description="Manage manufactured goods, item descriptions, and search tags."
+        icon={Package}
+        actions={
+          <Button
+            onClick={() => {
+              setSelectedProduct(null);
+              setIsDialogOpen(true);
+            }}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add Product
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader className="pb-3">

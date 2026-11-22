@@ -14,8 +14,6 @@ export interface PaginatedInvoicesResponse {
   page: number;
   limit: number;
   totalPages: number;
-  totalRevenue: number;
-  totalQuantity: number;
 }
 
 export const useGetPaginatedInvoices = (payload: InvoicePaginationPayload) => {
@@ -31,8 +29,6 @@ export const useGetPaginatedInvoices = (payload: InvoicePaginationPayload) => {
             page: payload.page,
             limit: payload.limit,
             totalPages: 1,
-            totalRevenue: 0,
-            totalQuantity: 0,
           }
         );
       }
@@ -42,8 +38,6 @@ export const useGetPaginatedInvoices = (payload: InvoicePaginationPayload) => {
         page: payload.page,
         limit: payload.limit,
         totalPages: 1,
-        totalRevenue: 0,
-        totalQuantity: 0,
       };
     },
   });

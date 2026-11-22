@@ -1,7 +1,7 @@
 import { ipcMain, dialog, BrowserWindow } from "electron";
 import { getDrizzleDb } from "./database";
 import * as schema from "./db/schema";
-import { count, desc, eq, like, or, sum } from "drizzle-orm";
+import { count, desc, eq, like, or } from "drizzle-orm";
 import fs from "fs";
 
 export function registerIpcHandlers() {
@@ -109,19 +109,15 @@ export function registerIpcHandlers() {
       );
     }
 
-    // Aggregate summary metrics across all matching invoices
-    const summaryQuery = db
+    // Count total matching records for pagination
+    const countQuery = db
       .select({
         total: count(),
-        totalRevenue: sum(schema.invoices.totalAmount),
-        totalQuantity: sum(schema.invoices.totalQuantity),
       })
       .from(schema.invoices);
 
-    const [summary] = conditions ? summaryQuery.where(conditions).all() : summaryQuery.all();
-    const total = summary?.total || 0;
-    const totalRevenue = Number(summary?.totalRevenue) || 0;
-    const totalQuantity = Number(summary?.totalQuantity) || 0;
+    const [countResult] = conditions ? countQuery.where(conditions).all() : countQuery.all();
+    const total = countResult?.total || 0;
 
     // Fetch page records
     const itemsQuery = db
@@ -139,8 +135,6 @@ export function registerIpcHandlers() {
       page,
       limit,
       totalPages: Math.ceil(total / limit) || 1,
-      totalRevenue,
-      totalQuantity,
     };
   });
 
