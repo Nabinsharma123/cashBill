@@ -9,11 +9,11 @@ import { useCreateProduct, useGetAllProducts } from "@/modules/product/hooks";
 import { useCreateInvoice } from "../hooks";
 import { invoiceFormSchema, InvoiceFormSchemaType } from "../zod";
 
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAlert } from "@/context/AlertDialogContext";
 import { CompanyFormDialog } from "@/modules/company/components/CompanyFormDialog";
 import { PartyFormDialog } from "@/modules/party/components/PartyFormDialog";
 import { ProductFormDialog } from "@/modules/product/components/ProductFormDialog";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { InvoiceViewModal } from "../components/InvoiceViewModal";
 
 import { Button } from "@/components/ui/button";
@@ -104,7 +104,6 @@ export const CreateInvoicePage: React.FC = () => {
       taxPreset: TaxPreset.IGST_18,
       gstEntries: [
         {
-          id: `gst-${Date.now()}-1`,
           type: GstType.IGST,
           rate: GstRate.RATE_18,
           amount: 0,
@@ -207,10 +206,7 @@ export const CreateInvoicePage: React.FC = () => {
     (acc, g) => acc + (Number(g.amount) || 0),
     0,
   );
-  const totalQuantity = watchedItems.reduce(
-    (acc, it) => acc + (Number(it.quantity) || 0),
-    0,
-  );
+
   const totalAmount = Number(
     (subtotal + totalGst + watchedRoundOff).toFixed(2),
   );
@@ -349,7 +345,7 @@ export const CreateInvoicePage: React.FC = () => {
       gstEntries: vals.gstEntries || watchedGstEntries,
       roundOff: Number(vals.roundOff ?? watchedRoundOff) || 0,
       totalAmount: totalAmount,
-      totalQuantity: totalQuantity,
+
       declaration: vals.declaration || "",
     };
   };
@@ -392,7 +388,6 @@ export const CreateInvoicePage: React.FC = () => {
         gstEntries: pendingSaveData.gstEntries,
         roundOff: Number(pendingSaveData.roundOff) || 0,
         totalAmount: totalAmount,
-        totalQuantity: totalQuantity,
         declaration: pendingSaveData.declaration || "",
       });
       showAlert({
@@ -951,12 +946,7 @@ export const CreateInvoicePage: React.FC = () => {
                     : `- ₹ ${Math.abs(watchedRoundOff).toFixed(2)}`}
                 </span>
               </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Total Quantity:</span>
-                <span className="font-mono font-medium">
-                  {totalQuantity.toFixed(2)}
-                </span>
-              </div>
+
               <div className="border-t pt-2 mt-2 flex justify-between font-bold text-base text-foreground">
                 <span>Grand Total:</span>
                 <span className="font-mono text-primary text-xl">

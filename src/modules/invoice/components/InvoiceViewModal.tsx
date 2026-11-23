@@ -152,7 +152,10 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
             gstEntries={gstEntries}
             roundOff={Number(inv.roundOff ?? inv.round_off) || 0}
             totalAmount={Number(inv.totalAmount ?? inv.total_amount) || 0}
-            totalQuantity={Number(inv.totalQuantity ?? inv.total_quantity) || 0}
+            totalQuantity={
+              Number(inv.totalQuantity ?? inv.total_quantity) ||
+              items.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0)
+            }
             declaration={inv.declaration}
           />
         </div>

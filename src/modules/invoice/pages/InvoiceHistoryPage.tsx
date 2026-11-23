@@ -186,7 +186,6 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
                     <TableHead>Date</TableHead>
                     <TableHead>Issuer Company</TableHead>
                     <TableHead>Buyer (Bill to)</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
                     <TableHead className="text-right">Amount (₹)</TableHead>
                     <TableHead className="text-right w-[150px]">Actions</TableHead>
                   </TableRow>
@@ -197,7 +196,6 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
                     const invoiceDate = inv.invoiceDate || (inv as any).invoice_date;
                     const companyName = inv.companyName || (inv as any).company_name;
                     const partyName = inv.partyName || (inv as any).party_name;
-                    const totalQuantity = inv.totalQuantity ?? (inv as any).total_quantity;
                     const totalAmount = inv.totalAmount ?? (inv as any).total_amount;
 
                     return (
@@ -219,9 +217,6 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
                           title={partyName}
                         >
                           {partyName}
-                        </TableCell>
-                        <TableCell className="text-right text-xs font-mono">
-                          {Number(totalQuantity).toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right font-mono font-bold text-primary">
                           ₹ {formatINR(totalAmount)}

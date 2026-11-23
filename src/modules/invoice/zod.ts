@@ -1,13 +1,15 @@
-import { z } from "zod";
-import { stringSchema, numberSchema } from "@/lib/zod";
 import { GstType, TaxPreset } from "@/constants/enums";
+import { numberSchema, stringSchema } from "@/lib/zod";
+import { z } from "zod";
 
 export const invoiceItemFormSchema = z.object({
   id: stringSchema("Item ID"),
   slNo: numberSchema("Serial No", 1),
   productId: numberSchema("Product ID").nullable().optional(),
   description: stringSchema("Description", 1, 500),
-  quantity: numberSchema("Quantity").positive("Quantity must be greater than 0"),
+  quantity: numberSchema("Quantity").positive(
+    "Quantity must be greater than 0",
+  ),
   rate: numberSchema("Rate", 0),
   per: stringSchema("Unit", 1, 50),
   amount: numberSchema("Amount", 0),

@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from "electron";
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getDatabase } from "./database";
@@ -17,20 +16,16 @@ process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
-  const preloadPath = fs.existsSync(path.join(__dirname, "preload.cjs"))
-    ? path.join(__dirname, "preload.cjs")
-    : path.join(__dirname, "preload.js");
-
   mainWindow = new BrowserWindow({
     title: "Biswakarma Engg",
     fullscreenable: true,
     webPreferences: {
-      preload: preloadPath,
+      preload: path.join(__dirname, "preload.cjs"),
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: false,
     },
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
   });
 
   mainWindow.webContents.on(

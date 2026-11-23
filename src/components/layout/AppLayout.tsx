@@ -1,6 +1,6 @@
+import { NavTab } from "@/constants/enums";
 import {
   Building2,
-  Database,
   FileText,
   Package,
   PlusCircle,
@@ -8,7 +8,6 @@ import {
   Users,
 } from "lucide-react";
 import React from "react";
-import { NavTab } from "@/constants/enums";
 
 export { NavTab };
 
@@ -64,7 +63,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </div>
               <div>
                 <div className="font-bold text-base leading-none tracking-tight">
-                  CashBill
+                  Invoice
                 </div>
               </div>
             </div>
@@ -95,15 +94,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               );
             })}
           </nav>
-        </div>
-
-        {/* Database Status & Footer */}
-        <div className="p-4 border-t bg-muted/20 text-xs text-muted-foreground flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Database className="h-3.5 w-3.5 text-emerald-500" />
-            <span className="font-mono text-[11px]">SQLite WAL DB</span>
-          </div>
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
         </div>
       </aside>
 

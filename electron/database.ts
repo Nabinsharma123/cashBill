@@ -105,7 +105,6 @@ function initTables(drizzleDb: BetterSQLite3Database<typeof schema>) {
       gst_entries_json TEXT NOT NULL,
       round_off REAL DEFAULT 0.0,
       total_amount REAL NOT NULL,
-      total_quantity REAL NOT NULL,
       declaration TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -116,6 +115,9 @@ function initTables(drizzleDb: BetterSQLite3Database<typeof schema>) {
     const cols = (drizzleDb as any).session.client.pragma("table_info(invoices)") as { name: string }[];
     if (cols.some((c) => c.name === "total_quantity_unit")) {
       (drizzleDb as any).session.client.prepare("ALTER TABLE invoices DROP COLUMN total_quantity_unit").run();
+    }
+    if (cols.some((c) => c.name === "total_quantity")) {
+      (drizzleDb as any).session.client.prepare("ALTER TABLE invoices DROP COLUMN total_quantity").run();
     }
   } catch (_e) {
     // Ignore if table does not exist or column already dropped

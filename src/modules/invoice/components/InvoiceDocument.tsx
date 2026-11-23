@@ -20,7 +20,7 @@ export interface InvoiceDocumentProps {
   gstEntries: TInvoiceSchema["GstEntry"][];
   roundOff: number;
   totalAmount: number;
-  totalQuantity: number;
+  totalQuantity?: number;
   declaration?: string;
 }
 
@@ -46,6 +46,9 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
 }) => {
   const MIN_TABLE_ROWS = 8;
   const emptyRowCount = Math.max(0, MIN_TABLE_ROWS - items.length);
+  const computedTotalQuantity =
+    totalQuantity ??
+    items.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0);
 
   return (
     <div className="invoice-document-root bg-white text-black font-sans leading-tight text-[13px] w-full max-w-[800px] mx-auto p-4 select-none print:p-0 print:max-w-none">
@@ -232,7 +235,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                   Total
                 </td>
                 <td className="border-r border-black py-1.5 px-2 text-right font-bold">
-                  {Number(totalQuantity).toFixed(2)}
+                  {Number(computedTotalQuantity).toFixed(2)}
                 </td>
                 <td className="border-r border-black"></td>
                 <td className="border-r border-black"></td>

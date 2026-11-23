@@ -21,7 +21,6 @@ export type TInvoiceSchema = {
     gstEntries: TInvoiceSchema["GstEntry"][];
     roundOff: number;
     totalAmount: number;
-    totalQuantity: number;
     declaration: string;
     createdAt?: string;
   };
@@ -63,7 +62,6 @@ export type TInvoiceSchema = {
     gstEntries: TInvoiceSchema["GstEntry"][];
     roundOff: number;
     totalAmount: number;
-    totalQuantity: number;
     declaration: string;
   };
 };

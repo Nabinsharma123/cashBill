@@ -176,7 +176,6 @@ export function registerIpcHandlers() {
       gstEntries: gstEntriesArr || [],
       roundOff: Number(invoice.roundOff ?? invoice.round_off) || 0,
       totalAmount: Number(invoice.totalAmount ?? invoice.total_amount) || 0,
-      totalQuantity: Number(invoice.totalQuantity ?? invoice.total_quantity) || 0,
       declaration: invoice.declaration || "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
     }).returning().get();
 
