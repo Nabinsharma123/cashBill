@@ -154,17 +154,6 @@ export const CreateInvoicePage: React.FC = () => {
     }
   }, [companies, watchedCompanyId, setValue]);
 
-  useEffect(() => {
-    if (!watchedPartyId && parties.length > 0) {
-      const first = parties[0];
-      setValue("partyId", first.id);
-      setValue("partyName", first.name);
-      setValue("partyAddress", first.address);
-      setValue("partyGstin", first.gstin);
-      setValue("partyStateName", first.stateName);
-    }
-  }, [parties, watchedPartyId, setValue]);
-
   // Derived calculations
   const subtotal = watchedItems.reduce(
     (acc, it) => acc + (Number(it.amount) || 0),
