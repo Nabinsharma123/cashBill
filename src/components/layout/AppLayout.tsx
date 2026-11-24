@@ -51,7 +51,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   ];
 
   return (
-    <div className="flex h-screen w-full bg-background overflow-hidden">
+    <div className="flex h-full w-full bg-background overflow-hidden">
       {/* Sidebar (hidden during printing) */}
       <aside className="no-print w-64 border-r bg-card/60 flex flex-col justify-between shrink-0 select-none">
         <div>
@@ -98,8 +98,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</div>
+      <main className="flex-1 flex flex-col overflow-hidden min-h-0">
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8 min-h-0">{children}</div>
       </main>
     </div>
   );

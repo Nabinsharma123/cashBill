@@ -4,6 +4,7 @@ import React, { ReactNode } from "react";
 
 export interface PageHeaderProps {
   title: string;
+  description?: string;
   icon?: LucideIcon | React.ComponentType<{ className?: string }>;
   actions?: ReactNode;
   children?: ReactNode;
@@ -13,6 +14,7 @@ export interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
+  description,
   icon: Icon,
   actions,
   children,
@@ -32,6 +34,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           {Icon && <Icon className="h-8 w-8 text-primary shrink-0" />}
           <span>{title}</span>
         </h1>
+        {description && (
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        )}
       </div>
 
       {(actions || children) && (
