@@ -285,7 +285,7 @@ export const CreateInvoicePage: React.FC = () => {
     const prod = products.find((p) => p.id === prodId);
     if (prod) {
       setValue(`items.${index}.productId`, prodId);
-      setValue(`items.${index}.description`, prod.name);
+      setValue(`items.${index}.productName`, prod.name);
     }
   };
 
@@ -695,9 +695,8 @@ export const CreateInvoicePage: React.FC = () => {
                   onClick={() =>
                     appendItem({
                       id: `item-${Date.now()}-${itemFields.length + 1}`,
-                      slNo: itemFields.length + 1,
                       productId: null,
-                      description: "",
+                      productName: "",
                       quantity: 1,
                       rate: 0,
                       per: QuantityUnit.SET,

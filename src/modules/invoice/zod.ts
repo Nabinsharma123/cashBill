@@ -4,9 +4,8 @@ import { z } from "zod";
 
 export const invoiceItemFormSchema = z.object({
   id: stringSchema("Item ID"),
-  slNo: numberSchema("Serial No", 1),
   productId: numberSchema("Product ID").nullable().optional(),
-  description: stringSchema("Description", 1, 500),
+  productName: stringSchema("Product Name", 1, 500),
   quantity: numberSchema("Quantity").positive(
     "Quantity must be greater than 0",
   ),

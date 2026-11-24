@@ -27,9 +27,8 @@ export type TInvoiceSchema = {
 
   Item: {
     id: string;
-    slNo: number;
     productId?: number | null;
-    description: string;
+    productName: string;
     quantity: number;
     rate: number;
     per: string;

@@ -150,10 +150,10 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
               {items.map((item, idx) => (
                 <tr key={item.id || idx} className="align-top">
                   <td className="border-r border-black py-1 px-1 text-center font-normal">
-                    {item.slNo ?? (item as any).sl_no ?? idx + 1}
+                    {idx + 1}
                   </td>
                   <td className="border-r border-black py-1 px-2 font-bold text-left uppercase">
-                    {item.description}
+                    {item.productName}
                   </td>
                   <td className="border-r border-black py-1 px-2 text-right font-medium">
                     {Number(item.quantity).toFixed(2)}
