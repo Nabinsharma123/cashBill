@@ -1,10 +1,9 @@
-import React, { ReactNode } from "react";
-import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+import React, { ReactNode } from "react";
 
 export interface PageHeaderProps {
   title: string;
-  description?: string;
   icon?: LucideIcon | React.ComponentType<{ className?: string }>;
   actions?: ReactNode;
   children?: ReactNode;
@@ -14,7 +13,6 @@ export interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
-  description,
   icon: Icon,
   actions,
   children,
@@ -26,7 +24,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       className={cn(
         "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4",
         bordered && "border-b pb-4",
-        className
+        className,
       )}
     >
       <div>
@@ -34,9 +32,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           {Icon && <Icon className="h-8 w-8 text-primary shrink-0" />}
           <span>{title}</span>
         </h1>
-        {description && (
-          <p className="text-muted-foreground mt-1 text-sm">{description}</p>
-        )}
       </div>
 
       {(actions || children) && (

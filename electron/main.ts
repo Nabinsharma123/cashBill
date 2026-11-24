@@ -25,7 +25,7 @@ function createWindow() {
       contextIsolation: true,
       sandbox: false,
     },
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
   });
 
   mainWindow.webContents.on(
@@ -55,7 +55,7 @@ function createWindow() {
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     // Open DevTools in dev mode
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(RENDERER_DIST, "index.html"));
   }

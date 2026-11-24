@@ -32,20 +32,14 @@ export const numberSchema = (name?: string, min?: number, max?: number) => {
   if (min !== undefined) {
     schema = schema.min(
       min,
-      name
-        ? `${name} must be at least ${min}`
-        : `Must be at least ${min}`,
+      name ? `${name} must be at least ${min}` : `Must be at least ${min}`,
     );
   }
   if (max !== undefined) {
     schema = schema.max(
       max,
-      name
-        ? `${name} can't be more than ${max}`
-        : `Can't be more than ${max}`,
+      name ? `${name} can't be more than ${max}` : `Can't be more than ${max}`,
     );
   }
   return schema;
 };
-
-export { z };

@@ -1,15 +1,15 @@
-import React from "react";
-import { TInvoiceSchema } from "../schema";
-import { InvoiceDocument } from "./InvoiceDocument";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Printer, Download, Save } from "lucide-react";
 import { InvoiceModalMode } from "@/constants/enums";
+import { Download, Printer, Save } from "lucide-react";
+import React from "react";
+import { TInvoiceSchema } from "../schema";
+import { InvoiceDocument } from "./InvoiceDocument";
 
 export { InvoiceModalMode };
 
@@ -41,18 +41,34 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
   if (Array.isArray(inv.items)) {
     items = inv.items;
   } else if (typeof inv.items === "string") {
-    try { items = JSON.parse(inv.items); } catch { items = []; }
+    try {
+      items = JSON.parse(inv.items);
+    } catch {
+      items = [];
+    }
   } else if (typeof inv.items_json === "string") {
-    try { items = JSON.parse(inv.items_json); } catch { items = []; }
+    try {
+      items = JSON.parse(inv.items_json);
+    } catch {
+      items = [];
+    }
   }
 
   let gstEntries: TInvoiceSchema["GstEntry"][] = [];
   if (Array.isArray(inv.gstEntries)) {
     gstEntries = inv.gstEntries;
   } else if (typeof inv.gstEntries === "string") {
-    try { gstEntries = JSON.parse(inv.gstEntries); } catch { gstEntries = []; }
+    try {
+      gstEntries = JSON.parse(inv.gstEntries);
+    } catch {
+      gstEntries = [];
+    }
   } else if (typeof inv.gst_entries_json === "string") {
-    try { gstEntries = JSON.parse(inv.gst_entries_json); } catch { gstEntries = []; }
+    try {
+      gstEntries = JSON.parse(inv.gst_entries_json);
+    } catch {
+      gstEntries = [];
+    }
   }
 
   const invoiceNo = inv.invoiceNo || inv.invoice_no || "";
@@ -122,7 +138,9 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
                     type="button"
                     size="sm"
                     onClick={() =>
-                      onExportPdf(`Invoice_${invoiceNo.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`)
+                      onExportPdf(
+                        `Invoice_${invoiceNo.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`,
+                      )
                     }
                     className="h-8 text-xs flex items-center gap-1.5"
                   >

@@ -58,6 +58,7 @@
   }
 }
 
+
 /* Print Specific Rules for Precision A4 Output */
 @media print {
   @page {

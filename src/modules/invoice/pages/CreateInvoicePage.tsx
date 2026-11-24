@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 
 import { useCreateCompany, useGetAllCompanies } from "@/modules/company/hooks";
 import { useCreateParty, useGetAllParties } from "@/modules/party/hooks";
@@ -16,8 +16,16 @@ import { PartyFormDialog } from "@/modules/party/components/PartyFormDialog";
 import { ProductFormDialog } from "@/modules/product/components/ProductFormDialog";
 import { InvoiceViewModal } from "../components/InvoiceViewModal";
 
+import DatePicker from "@/components/date-picker";
+import NumberField from "@/components/NumberField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -45,6 +53,8 @@ import {
   INVOICE_TITLE_OPTIONS,
   InvoiceModalMode,
   InvoiceTitle,
+  QUANTITY_UNIT_OPTIONS,
+  QuantityUnit,
   TAX_PRESET_OPTIONS,
   TaxPreset,
 } from "@/constants/enums";
@@ -78,20 +88,20 @@ export const CreateInvoicePage: React.FC = () => {
 
   // React Hook Form with Zod Schema
   const {
-    register,
     control,
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    getValues,
+    formState: { isSubmitting },
   } = useForm<InvoiceFormSchemaType>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      invoiceNo: "BI/2024/25/001",
+      invoiceNo: "",
       invoiceTitle: InvoiceTitle.PROFORMA,
       invoiceDate: dayjs().format("YYYY-MM-DD"),
-      companyId: 0,
-      partyId: 0,
+      companyId: NaN,
+      partyId: NaN,
       companyName: "",
       companyAddress: "",
       companyGstin: "",
@@ -109,7 +119,7 @@ export const CreateInvoicePage: React.FC = () => {
           amount: 0,
         },
       ],
-      roundOff: 0.4,
+      roundOff: 0,
       declaration:
         "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
     },
@@ -135,6 +145,9 @@ export const CreateInvoicePage: React.FC = () => {
 
   // Watch form fields for live preview and reactive computations
   const formValues = watch();
+
+  console.log(formValues);
+
   const watchedItems = formValues.items || [];
   const watchedGstEntries = formValues.gstEntries || [];
   const watchedTaxPreset = formValues.taxPreset;
@@ -252,9 +265,10 @@ export const CreateInvoicePage: React.FC = () => {
   ) => {
     setValue(`items.${index}.${field}`, value);
     const currentQty =
-      field === "quantity" ? value : Number(watchedItems[index]?.quantity || 0);
+      field === "quantity" ? value : getValues(`items.${index}.quantity`) || 0;
     const currentRate =
-      field === "rate" ? value : Number(watchedItems[index]?.rate || 0);
+      field === "rate" ? value : getValues(`items.${index}.rate`) || 0;
+
     const amount = Number((currentQty * currentRate).toFixed(2));
     setValue(`items.${index}.amount`, amount);
   };
@@ -312,10 +326,10 @@ export const CreateInvoicePage: React.FC = () => {
   };
 
   // Build current invoice object from form state
-  const buildCurrentInvoiceData = (formData?: InvoiceFormSchemaType) => {
-    const vals = formData || formValues;
+  const buildCurrentInvoiceData = (formData: InvoiceFormSchemaType) => {
+    const vals = formData;
     return {
-      invoiceNo: vals.invoiceNo || "DRAFT",
+      invoiceNo: vals.invoiceNo || "",
       invoiceTitle: vals.invoiceTitle,
       invoiceDate: vals.invoiceDate,
       companyId: vals.companyId,
@@ -341,7 +355,7 @@ export const CreateInvoicePage: React.FC = () => {
 
   // 1. Preview button handler - opens in view-only mode
   const handleOpenPreview = () => {
-    setPreviewInvoice(buildCurrentInvoiceData());
+    setPreviewInvoice(buildCurrentInvoiceData(getValues()));
     setModalMode(InvoiceModalMode.PREVIEW);
     setIsViewModalOpen(true);
   };
@@ -403,7 +417,6 @@ export const CreateInvoicePage: React.FC = () => {
     <form onSubmit={handleSubmit(onFormValidForSave)} className="space-y-6">
       <PageHeader
         title="Create Invoice"
-        description="Create and save proforma and tax invoices with instant preview and PDF export."
         bordered
         actions={
           <>
@@ -441,85 +454,121 @@ export const CreateInvoicePage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <Label>Invoice Document Title</Label>
-                <Select
-                  value={formValues.invoiceTitle}
-                  onValueChange={(val) => setValue("invoiceTitle", val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INVOICE_TITLE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Controller
+                control={control}
+                name="invoiceTitle"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required>Invoice Document Title</FieldLabel>
+                    <FieldContent>
+                      <Select
+                        value={field?.value}
+                        onValueChange={field?.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {INVOICE_TITLE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="inv-no">Invoice No. *</Label>
-                <Input
-                  id="inv-no"
-                  {...register("invoiceNo")}
-                  placeholder="e.g. BI/2024/25/001"
-                />
-                {errors.invoiceNo && (
-                  <p className="text-xs text-destructive">
-                    {errors.invoiceNo.message}
-                  </p>
+                      {fieldState?.invalid && (
+                        <FieldError errors={[fieldState?.error]} />
+                      )}
+                    </FieldContent>
+                  </Field>
                 )}
-              </div>
+              />
 
-              <div className="space-y-1.5">
-                <Label htmlFor="inv-date">Dated *</Label>
-                <Input id="inv-date" type="date" {...register("invoiceDate")} />
-                {errors.invoiceDate && (
-                  <p className="text-xs text-destructive">
-                    {errors.invoiceDate.message}
-                  </p>
+              <Controller
+                control={control}
+                name="invoiceNo"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required>Invoice No.</FieldLabel>
+                    <FieldContent>
+                      <Input {...field} placeholder="e.g. BI/2024/25/001" />
+                      {fieldState?.invalid && (
+                        <FieldError errors={[fieldState?.error]} />
+                      )}
+                    </FieldContent>
+                  </Field>
                 )}
-              </div>
+              />
+
+              <Controller
+                control={control}
+                name="invoiceDate"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel required>Dated</FieldLabel>
+                    <FieldContent>
+                      <DatePicker
+                        value={field?.value}
+                        onChange={field?.onChange}
+                        placeholder="Select Date"
+                      />
+                      {fieldState?.invalid && (
+                        <FieldError errors={[fieldState?.error]} />
+                      )}
+                    </FieldContent>
+                  </Field>
+                )}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {/* Select Company */}
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label className="font-medium">Company (Seller) *</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-1.5 text-xs text-primary"
-                    onClick={() => setIsCompDialogOpen(true)}
-                  >
-                    + New Company
-                  </Button>
-                </div>
-                <Select
-                  value={watchedCompanyId ? String(watchedCompanyId) : ""}
-                  onValueChange={handleCompanyChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select company..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((c) => (
-                      <SelectItem key={c.id} value={String(c.id)}>
-                        {c.name} ({c.gstin.slice(0, 2)})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.companyId && (
-                  <p className="text-xs text-destructive">
-                    {errors.companyId.message}
-                  </p>
-                )}
+                <Controller
+                  control={control}
+                  name="companyId"
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <div className="flex justify-between items-center">
+                        <FieldLabel required>Company (Seller)</FieldLabel>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-1.5 text-xs text-primary"
+                          onClick={() => setIsCompDialogOpen(true)}
+                        >
+                          + New Company
+                        </Button>
+                      </div>
+
+                      <FieldContent>
+                        <Select
+                          value={String(field?.value)}
+                          onValueChange={handleCompanyChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select company..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {companies.map((c) => (
+                              <SelectItem key={c.id} value={String(c.id)}>
+                                {c.name} ({c.gstin.slice(0, 2)})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {fieldState?.invalid && (
+                          <FieldError errors={[fieldState?.error]} />
+                        )}
+                      </FieldContent>
+                    </Field>
+                  )}
+                />
+
                 {selectedCompany && (
                   <div className="p-2.5 rounded bg-muted/40 text-xs text-muted-foreground space-y-0.5 border">
                     <div className="font-semibold text-foreground">
@@ -536,38 +585,50 @@ export const CreateInvoicePage: React.FC = () => {
 
               {/* Select Party */}
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label className="font-medium">Buyer (Bill to Party) *</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-1.5 text-xs text-primary"
-                    onClick={() => setIsPartyDialogOpen(true)}
-                  >
-                    + New Party
-                  </Button>
-                </div>
-                <Select
-                  value={watchedPartyId ? String(watchedPartyId) : ""}
-                  onValueChange={handlePartyChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select buyer party..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {parties.map((p) => (
-                      <SelectItem key={p.id} value={String(p.id)}>
-                        {p.name} ({p.gstin.slice(0, 2)})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.partyId && (
-                  <p className="text-xs text-destructive">
-                    {errors.partyId.message}
-                  </p>
-                )}
+                <Controller
+                  control={control}
+                  name="partyId"
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <div className="flex justify-between items-center">
+                        <FieldLabel required>Buyer (Bill to Party)</FieldLabel>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-1.5 text-xs text-primary"
+                          onClick={() => setIsPartyDialogOpen(true)}
+                        >
+                          + New Party
+                        </Button>
+                      </div>
+
+                      <FieldContent>
+                        <Select
+                          value={String(field?.value)}
+                          onValueChange={handlePartyChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select buyer party..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {parties.map((p) => (
+                              <SelectItem key={p.id} value={String(p.id)}>
+                                {p.name} ({p.gstin.slice(0, 2)})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {fieldState?.invalid && (
+                          <FieldError errors={[fieldState?.error]} />
+                        )}
+                      </FieldContent>
+                    </Field>
+                  )}
+                />
+
                 {selectedParty && (
                   <div className="p-2.5 rounded bg-muted/40 text-xs text-muted-foreground space-y-0.5 border">
                     <div className="font-semibold text-foreground">
@@ -590,7 +651,7 @@ export const CreateInvoicePage: React.FC = () => {
             <div className="flex justify-between items-center">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <Package className="h-4 w-4 text-primary" />
-                Description of Goods (Line Items)
+                Items
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Button
@@ -600,7 +661,7 @@ export const CreateInvoicePage: React.FC = () => {
                   onClick={() => setIsProdDialogOpen(true)}
                   className="text-xs"
                 >
-                  + Add New Product to DB
+                  + Add New Product
                 </Button>
                 <Button
                   type="button"
@@ -613,7 +674,7 @@ export const CreateInvoicePage: React.FC = () => {
                       description: "",
                       quantity: 1,
                       rate: 0,
-                      per: "SETS",
+                      per: QuantityUnit.SET,
                       amount: 0,
                     })
                   }
@@ -631,9 +692,9 @@ export const CreateInvoicePage: React.FC = () => {
                   <TableRow className="text-xs">
                     <TableHead className="w-[45px] text-center">#</TableHead>
                     <TableHead className="min-w-[200px]">Description</TableHead>
-                    <TableHead className="w-[90px]">Qty</TableHead>
+                    <TableHead className="w-[100px]">Qty</TableHead>
                     <TableHead className="w-[100px]">Rate (₹)</TableHead>
-                    <TableHead className="w-[90px]">per</TableHead>
+                    <TableHead className="w-[100px]">per</TableHead>
                     <TableHead className="w-[100px] text-right">
                       Amount (₹)
                     </TableHead>
@@ -648,77 +709,121 @@ export const CreateInvoicePage: React.FC = () => {
                       </TableCell>
                       <TableCell className="space-y-1">
                         {/* Fast product selector dropdown */}
-                        <Select
-                          value={
-                            watchedItems[index]?.productId
-                              ? String(watchedItems[index].productId)
-                              : ""
-                          }
-                          onValueChange={(val) =>
-                            handleSelectProduct(index, val)
-                          }
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Pick a product..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {products.map((p) => (
-                              <SelectItem key={p.id} value={String(p.id)}>
-                                {p.name} {p.tags ? `(${p.tags})` : ""}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
 
-                        {/* Free text description input */}
-                        <Input
-                          {...register(`items.${index}.description`)}
-                          placeholder="Description of goods..."
-                          className="h-8 text-xs font-medium"
-                        />
-                        {errors.items?.[index]?.description && (
-                          <p className="text-[10px] text-destructive">
-                            {errors.items[index]?.description?.message}
-                          </p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={watchedItems[index]?.quantity ?? 0}
-                          onChange={(e) =>
-                            handleItemNumberChange(
-                              index,
-                              "quantity",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
-                          className="h-8 text-xs text-right"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={watchedItems[index]?.rate ?? 0}
-                          onChange={(e) =>
-                            handleItemNumberChange(
-                              index,
-                              "rate",
-                              parseFloat(e.target.value) || 0,
-                            )
-                          }
-                          className="h-8 text-xs text-right"
+                        <Controller
+                          control={control}
+                          name={`items.${index}.productId`}
+                          render={({ field, fieldState }) => (
+                            <Field>
+                              <FieldContent>
+                                <Select
+                                  value={String(field?.value)}
+                                  onValueChange={(val) =>
+                                    handleSelectProduct(index, val)
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Pick a product..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {products.map((p) => (
+                                      <SelectItem
+                                        key={p.id}
+                                        value={String(p.id)}
+                                      >
+                                        {p.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+
+                                {fieldState?.invalid && (
+                                  <FieldError errors={[fieldState?.error]} />
+                                )}
+                              </FieldContent>
+                            </Field>
+                          )}
                         />
                       </TableCell>
                       <TableCell>
-                        <Input
-                          {...register(`items.${index}.per`)}
-                          placeholder="SETS"
-                          className="h-8 text-xs text-center uppercase"
+                        <Controller
+                          control={control}
+                          name={`items.${index}.quantity`}
+                          render={({ field, fieldState }) => (
+                            <Field>
+                              <FieldContent>
+                                <NumberField
+                                  {...field}
+                                  onChange={(e) => {
+                                    handleItemNumberChange(
+                                      index,
+                                      "quantity",
+                                      Number(e.target.value),
+                                    );
+                                  }}
+                                />
+                                {fieldState?.invalid && (
+                                  <FieldError errors={[fieldState?.error]} />
+                                )}
+                              </FieldContent>
+                            </Field>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Controller
+                          control={control}
+                          name={`items.${index}.rate`}
+                          render={({ field, fieldState }) => (
+                            <Field>
+                              <FieldContent>
+                                <NumberField
+                                  {...field}
+                                  onChange={(e) => {
+                                    handleItemNumberChange(
+                                      index,
+                                      "rate",
+                                      Number(e.target.value),
+                                    );
+                                  }}
+                                />
+                                {fieldState?.invalid && (
+                                  <FieldError errors={[fieldState?.error]} />
+                                )}
+                              </FieldContent>
+                            </Field>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Controller
+                          control={control}
+                          name={`items.${index}.per`}
+                          render={({ field, fieldState }) => (
+                            <Field>
+                              <FieldContent>
+                                <Select
+                                  value={String(field?.value)}
+                                  onValueChange={field.onChange}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {QUANTITY_UNIT_OPTIONS.map((p) => (
+                                      <SelectItem key={p.value} value={p.value}>
+                                        {p.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+
+                                {fieldState?.invalid && (
+                                  <FieldError errors={[fieldState?.error]} />
+                                )}
+                              </FieldContent>
+                            </Field>
+                          )}
                         />
                       </TableCell>
                       <TableCell className="text-right font-mono font-semibold">
@@ -760,31 +865,44 @@ export const CreateInvoicePage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* GST Preset Options */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase font-semibold">
-                GST Preset Options
-              </Label>
-              <RadioGroup
-                value={watchedTaxPreset}
-                onValueChange={(val: any) => setValue("taxPreset", val)}
-                className="flex flex-col sm:flex-row gap-4 pt-1"
-              >
-                {TAX_PRESET_OPTIONS.map((opt) => (
-                  <div key={opt.value} className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value={opt.value}
-                      id={`preset-${opt.value}`}
-                    />
-                    <Label
-                      htmlFor={`preset-${opt.value}`}
-                      className="cursor-pointer font-medium"
+
+            <Controller
+              control={control}
+              name="taxPreset"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel required>GST Preset Options</FieldLabel>
+                  <FieldContent>
+                    <RadioGroup
+                      value={field?.value}
+                      onValueChange={field?.onChange}
+                      className="flex flex-col sm:flex-row gap-4 pt-1"
                     >
-                      {opt.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
+                      {TAX_PRESET_OPTIONS.map((opt) => (
+                        <div
+                          key={opt.value}
+                          className="flex items-center space-x-2"
+                        >
+                          <RadioGroupItem
+                            value={opt.value}
+                            id={`preset-${opt.value}`}
+                          />
+                          <Label
+                            htmlFor={`preset-${opt.value}`}
+                            className="cursor-pointer font-medium"
+                          >
+                            {opt.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    {fieldState?.invalid && (
+                      <FieldError errors={[fieldState?.error]} />
+                    )}
+                  </FieldContent>
+                </Field>
+              )}
+            />
 
             {/* GST Entries */}
             <div className="space-y-2 border-t pt-3">
@@ -819,54 +937,90 @@ export const CreateInvoicePage: React.FC = () => {
                   >
                     {/* GST dropdown */}
                     <div className="w-[120px]">
-                      <Select
-                        value={watchedGstEntries[index]?.type || GstType.IGST}
-                        onValueChange={(val: GstType) => {
-                          setValue("taxPreset", TaxPreset.CUSTOM);
-                          setValue(`gstEntries.${index}.type`, val);
-                        }}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {GST_TYPE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Controller
+                        control={control}
+                        name={`gstEntries.${index}.type`}
+                        render={({ field, fieldState }) => (
+                          <Field>
+                            <FieldContent>
+                              <Select
+                                value={String(field?.value)}
+                                onValueChange={(val) => {
+                                  setValue("taxPreset", TaxPreset.CUSTOM);
+
+                                  field.onChange(val);
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {GST_TYPE_OPTIONS.map((opt) => (
+                                    <SelectItem
+                                      key={opt.value}
+                                      value={opt.value}
+                                    >
+                                      {opt.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+
+                              {fieldState?.invalid && (
+                                <FieldError errors={[fieldState?.error]} />
+                              )}
+                            </FieldContent>
+                          </Field>
+                        )}
+                      />
                     </div>
 
                     {/* Rate dropdown */}
                     <div className="w-[110px]">
-                      <Select
-                        value={String(watchedGstEntries[index]?.rate ?? 18)}
-                        onValueChange={(val) => {
-                          setValue("taxPreset", TaxPreset.CUSTOM);
-                          const rateNum = Number(val) as GstRate;
-                          setValue(`gstEntries.${index}.rate`, rateNum);
-                          const newAmt = Number(
-                            ((subtotal * rateNum) / 100).toFixed(2),
-                          );
-                          setValue(`gstEntries.${index}.amount`, newAmt);
-                        }}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {GST_RATE_OPTIONS.map((opt) => (
-                            <SelectItem
-                              key={opt.value}
-                              value={String(opt.value)}
-                            >
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Controller
+                        control={control}
+                        name={`gstEntries.${index}.rate`}
+                        render={({ field, fieldState }) => (
+                          <Field>
+                            <FieldContent>
+                              <Select
+                                value={String(field?.value)}
+                                onValueChange={(val) => {
+                                  setValue("taxPreset", TaxPreset.CUSTOM);
+                                  const rateNum = Number(val) as GstRate;
+
+                                  field?.onChange(rateNum);
+                                  const newAmt = Number(
+                                    ((subtotal * rateNum) / 100).toFixed(2),
+                                  );
+                                  setValue(
+                                    `gstEntries.${index}.amount`,
+                                    newAmt,
+                                  );
+                                }}
+                              >
+                                <SelectTrigger className="h-8 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {GST_RATE_OPTIONS.map((opt) => (
+                                    <SelectItem
+                                      key={opt.value}
+                                      value={String(opt.value)}
+                                    >
+                                      {opt.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+
+                              {fieldState?.invalid && (
+                                <FieldError errors={[fieldState?.error]} />
+                              )}
+                            </FieldContent>
+                          </Field>
+                        )}
+                      />
                     </div>
 
                     {/* Calculated amount */}
@@ -897,22 +1051,30 @@ export const CreateInvoicePage: React.FC = () => {
             {/* Round Off */}
             <div className="border-t pt-3 max-w-xs">
               <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="round-off">Round Off (₹)</Label>
-                  <button
-                    type="button"
-                    onClick={applyAutoRoundOff}
-                    className="text-[11px] text-primary hover:underline"
-                  >
-                    Auto-Round
-                  </button>
-                </div>
-                <Input
-                  id="round-off"
-                  type="number"
-                  step="0.01"
-                  {...register("roundOff", { valueAsNumber: true })}
-                  className="font-mono text-right"
+                <Controller
+                  control={control}
+                  name="roundOff"
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <div className="flex justify-between items-center">
+                        <FieldLabel>Round Off (₹)</FieldLabel>
+
+                        <button
+                          type="button"
+                          onClick={applyAutoRoundOff}
+                          className="text-[11px] text-primary hover:underline"
+                        >
+                          Auto-Round
+                        </button>
+                      </div>
+                      <FieldContent>
+                        <NumberField {...field} />
+                        {fieldState?.invalid && (
+                          <FieldError errors={[fieldState?.error]} />
+                        )}
+                      </FieldContent>
+                    </Field>
+                  )}
                 />
               </div>
             </div>
@@ -949,10 +1111,21 @@ export const CreateInvoicePage: React.FC = () => {
         {/* 4. Declaration */}
         <Card>
           <CardContent className="pt-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="declaration-text">Declaration Note</Label>
-              <Input id="declaration-text" {...register("declaration")} />
-            </div>
+            <Controller
+              control={control}
+              name="declaration"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel required>Declaration Note</FieldLabel>
+                  <FieldContent>
+                    <Input {...field} />
+                    {fieldState?.invalid && (
+                      <FieldError errors={[fieldState?.error]} />
+                    )}
+                  </FieldContent>
+                </Field>
+              )}
+            />
           </CardContent>
         </Card>
       </div>
