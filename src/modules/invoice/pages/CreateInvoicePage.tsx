@@ -1,11 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-
 import { useCreateCompany, useGetAllCompanies } from "@/modules/company/hooks";
 import { useCreateParty, useGetAllParties } from "@/modules/party/hooks";
 import { useCreateProduct, useGetAllProducts } from "@/modules/product/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
+import dayjs from "dayjs";
+import { nanoid } from "nanoid";
+import React, { useEffect, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useCreateInvoice } from "../hooks";
 import { invoiceFormSchema, InvoiceFormSchemaType } from "../zod";
 
@@ -111,7 +111,17 @@ export const CreateInvoicePage: React.FC = () => {
       partyAddress: "",
       partyGstin: "",
       partyStateName: "",
-      items: [],
+      items: [
+        {
+          amount: 0,
+          id: nanoid(5),
+          per: QuantityUnit.SET,
+          productId: NaN,
+          productName: "",
+          quantity: 1,
+          rate: 0,
+        },
+      ],
       taxPreset: TaxPreset.IGST_18,
       gstEntries: [
         {
@@ -187,7 +197,6 @@ export const CreateInvoicePage: React.FC = () => {
   const watchedCompanyId = formValues.companyId;
   const watchedPartyId = formValues.partyId;
 
-  // Auto-select initial company/party when loaded if not yet set
   useEffect(() => {
     if (!watchedCompanyId && companies.length > 0) {
       const first = companies[0];
@@ -695,7 +704,7 @@ export const CreateInvoicePage: React.FC = () => {
                   onClick={() =>
                     appendItem({
                       id: `item-${Date.now()}-${itemFields.length + 1}`,
-                      productId: null,
+                      productId: NaN,
                       productName: "",
                       quantity: 1,
                       rate: 0,
@@ -772,6 +781,7 @@ export const CreateInvoicePage: React.FC = () => {
                               <FieldContent>
                                 <NumberField
                                   {...field}
+                                  onFocus={(e) => e.target.select()}
                                   onChange={(e) => {
                                     handleItemNumberChange(
                                       index,
@@ -797,6 +807,7 @@ export const CreateInvoicePage: React.FC = () => {
                               <FieldContent>
                                 <NumberField
                                   {...field}
+                                  onFocus={(e) => e.target.select()}
                                   onChange={(e) => {
                                     handleItemNumberChange(
                                       index,
@@ -821,7 +832,7 @@ export const CreateInvoicePage: React.FC = () => {
                             <Field>
                               <FieldContent>
                                 <Select
-                                  value={String(field?.value)}
+                                  value={field?.value}
                                   onValueChange={field.onChange}
                                 >
                                   <SelectTrigger>
@@ -863,6 +874,21 @@ export const CreateInvoicePage: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
+              <div className="p-4">
+                <Controller
+                  control={control}
+                  name="items"
+                  render={({ fieldState }) => (
+                    <Field>
+                      <FieldContent>
+                        {fieldState?.invalid && (
+                          <FieldError errors={[fieldState?.error]} />
+                        )}
+                      </FieldContent>
+                    </Field>
+                  )}
+                />
+              </div>
             </div>
 
             <div className="p-3 bg-muted/20 border-t flex justify-between items-center text-sm">
@@ -1086,7 +1112,10 @@ export const CreateInvoicePage: React.FC = () => {
                         </button>
                       </div>
                       <FieldContent>
-                        <NumberField {...field} />
+                        <NumberField
+                          {...field}
+                          onFocus={(e) => e.target.select()}
+                        />
                         {fieldState?.invalid && (
                           <FieldError errors={[fieldState?.error]} />
                         )}

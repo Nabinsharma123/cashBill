@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const invoiceItemFormSchema = z.object({
   id: stringSchema("Item ID"),
-  productId: numberSchema("Product ID").nullable().optional(),
+  productId: numberSchema("Product ID"),
   productName: stringSchema("Product Name", 1, 500),
   quantity: numberSchema("Quantity").positive(
     "Quantity must be greater than 0",
@@ -29,21 +29,21 @@ export const invoiceFormSchema = z.object({
   invoiceNo: stringSchema("Invoice number", 1, 100),
   invoiceTitle: stringSchema("Invoice title", 1, 100),
   invoiceDate: stringSchema("Date", 1, 50),
-  companyId: numberSchema("Company").positive("Please select a Company"),
-  partyId: numberSchema("Party").positive("Please select a Party"),
-  companyName: stringSchema("Company name", 1, 200),
-  companyAddress: stringSchema("Company address", 1, 500),
+  companyId: numberSchema("Company"),
+  partyId: numberSchema("Party"),
+  companyName: stringSchema("Company name"),
+  companyAddress: stringSchema("Company address"),
   companyGstin: stringSchema("Company GSTIN", 1, 50),
   companyStateName: stringSchema("Company state", 1, 100),
-  partyName: stringSchema("Party name", 1, 200),
-  partyAddress: stringSchema("Party address", 1, 500),
+  partyName: stringSchema("Party name"),
+  partyAddress: stringSchema("Party address"),
   partyGstin: stringSchema("Party GSTIN", 1, 50),
   partyStateName: stringSchema("Party state", 1, 100),
   items: z.array(invoiceItemFormSchema).min(1, "Add at least one product item"),
   taxPreset: z.nativeEnum(TaxPreset).default(TaxPreset.IGST_18),
   gstEntries: z.array(gstEntryFormSchema),
-  roundOff: numberSchema("Round off").default(0),
-  declaration: stringSchema("Declaration", 0, 1000).optional(),
+  roundOff: numberSchema("Round off"),
+  declaration: stringSchema("Declaration", 1, 500),
 });
 
 export type InvoiceFormSchemaType = z.infer<typeof invoiceFormSchema>;

@@ -27,7 +27,17 @@ export const stringSchema = (name?: string, min = 1, max = 200) =>
  */
 export const numberSchema = (name?: string, min?: number, max?: number) => {
   let schema = z.coerce.number({
-    message: name ? `${name} must be a valid number` : "Must be a valid number",
+    errorMap: (issue, ctx) => {
+      if (issue.code === z.ZodIssueCode.invalid_type && issue.received === "nan") {
+        return { message: name ? `${name} is required` : "Value is Required" };
+      }
+      if (issue.code === z.ZodIssueCode.invalid_type) {
+        return {
+          message: name ? `${name} must be a valid number` : "Must be a valid number",
+        };
+      }
+      return { message: ctx.defaultError };
+    },
   });
   if (min !== undefined) {
     schema = schema.min(
