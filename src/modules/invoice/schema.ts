@@ -1,4 +1,4 @@
-import { GstType, GstRate, InvoiceTitle, TaxPreset } from "@/constants/enums";
+import { GstRate, GstType, InvoiceTitle, TaxPreset } from "@/constants/enums";
 
 export type TInvoiceSchema = {
   Doc: {
@@ -66,4 +66,4 @@ export type TInvoiceSchema = {
   };
 };
 
-export { GstType, GstRate, InvoiceTitle, TaxPreset };
+export { GstRate, GstType, InvoiceTitle, TaxPreset };

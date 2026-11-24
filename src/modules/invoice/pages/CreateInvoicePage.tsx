@@ -20,6 +20,7 @@ import DatePicker from "@/components/date-picker";
 import NumberField from "@/components/NumberField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import {
   Field,
   FieldContent,
@@ -146,7 +147,38 @@ export const CreateInvoicePage: React.FC = () => {
   // Watch form fields for live preview and reactive computations
   const formValues = watch();
 
-  console.log(formValues);
+  const companyOptions: ComboboxOption[] = React.useMemo(
+    () =>
+      companies.map((c) => ({
+        value: c.id,
+        label: `${c.name} (${c.gstin.slice(0, 2)})`,
+        description: `GSTIN: ${c.gstin} | ${c.stateName}`,
+        keywords: [c.name, c.gstin, c.stateName, c.address],
+      })),
+    [companies],
+  );
+
+  const partyOptions: ComboboxOption[] = React.useMemo(
+    () =>
+      parties.map((p) => ({
+        value: p.id,
+        label: `${p.name} (${p.gstin.slice(0, 2)})`,
+        description: `GSTIN: ${p.gstin} | ${p.stateName}`,
+        keywords: [p.name, p.gstin, p.stateName, p.address],
+      })),
+    [parties],
+  );
+
+  const productOptions: ComboboxOption[] = React.useMemo(
+    () =>
+      products.map((p) => ({
+        value: p.id,
+        label: p.name,
+        description: p.tags ? `Tags: ${p.tags}` : undefined,
+        keywords: [p.name, p.tags || ""],
+      })),
+    [products],
+  );
 
   const watchedItems = formValues.items || [];
   const watchedGstEntries = formValues.gstEntries || [];
@@ -545,21 +577,18 @@ export const CreateInvoicePage: React.FC = () => {
                       </div>
 
                       <FieldContent>
-                        <Select
-                          value={String(field?.value)}
-                          onValueChange={handleCompanyChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select company..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {companies.map((c) => (
-                              <SelectItem key={c.id} value={String(c.id)}>
-                                {c.name} ({c.gstin.slice(0, 2)})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Combobox
+                          ref={field.ref}
+                          value={field.value}
+                          onChange={(val) => {
+                            field.onChange(val);
+                            handleCompanyChange(String(val));
+                          }}
+                          options={companyOptions}
+                          placeholder="Select company..."
+                          searchPlaceholder="Search company by name, GSTIN, state..."
+                          emptyText="No company found."
+                        />
 
                         {fieldState?.invalid && (
                           <FieldError errors={[fieldState?.error]} />
@@ -605,21 +634,18 @@ export const CreateInvoicePage: React.FC = () => {
                       </div>
 
                       <FieldContent>
-                        <Select
-                          value={String(field?.value)}
-                          onValueChange={handlePartyChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select buyer party..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {parties.map((p) => (
-                              <SelectItem key={p.id} value={String(p.id)}>
-                                {p.name} ({p.gstin.slice(0, 2)})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Combobox
+                          ref={field.ref}
+                          value={field.value}
+                          onChange={(val) => {
+                            field.onChange(val);
+                            handlePartyChange(String(val));
+                          }}
+                          options={partyOptions}
+                          placeholder="Select buyer party..."
+                          searchPlaceholder="Search party by name, GSTIN, state..."
+                          emptyText="No party found."
+                        />
 
                         {fieldState?.invalid && (
                           <FieldError errors={[fieldState?.error]} />
@@ -691,7 +717,7 @@ export const CreateInvoicePage: React.FC = () => {
                 <TableHeader>
                   <TableRow className="text-xs">
                     <TableHead className="w-[45px] text-center">#</TableHead>
-                    <TableHead className="min-w-[200px]">Description</TableHead>
+                    <TableHead className="min-w-[200px]">Product</TableHead>
                     <TableHead className="w-[100px]">Qty</TableHead>
                     <TableHead className="w-[100px]">Rate (₹)</TableHead>
                     <TableHead className="w-[100px]">per</TableHead>
@@ -716,26 +742,19 @@ export const CreateInvoicePage: React.FC = () => {
                           render={({ field, fieldState }) => (
                             <Field>
                               <FieldContent>
-                                <Select
-                                  value={String(field?.value)}
-                                  onValueChange={(val) =>
-                                    handleSelectProduct(index, val)
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Pick a product..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {products.map((p) => (
-                                      <SelectItem
-                                        key={p.id}
-                                        value={String(p.id)}
-                                      >
-                                        {p.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <Combobox
+                                  ref={field.ref}
+                                  value={field.value}
+                                  onChange={(val) => {
+                                    field.onChange(val);
+                                    handleSelectProduct(index, String(val));
+                                  }}
+                                  options={productOptions}
+                                  placeholder="Pick a product..."
+                                  searchPlaceholder="Search product or tags..."
+                                  emptyText="No product found."
+                                  contentClassName="min-w-[280px]"
+                                />
 
                                 {fieldState?.invalid && (
                                   <FieldError errors={[fieldState?.error]} />
