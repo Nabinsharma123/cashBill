@@ -110,7 +110,7 @@ export const CreateInvoicePage: React.FC = () => {
     formState: { isSubmitting, errors },
   } = useForm<InvoiceFormSchemaType>({
     resolver: zodResolver(invoiceFormSchema),
-    mode: "onChange",
+
     defaultValues: {
       invoiceNo: "",
       invoiceTitle: InvoiceTitle.PROFORMA,
@@ -305,13 +305,19 @@ export const CreateInvoicePage: React.FC = () => {
   const handleCompanyChange = (id: number) => {
     const comp = companies.find((c) => c.id === id);
     if (comp) {
-      setValue("company", {
-        address: comp?.address,
-        gstin: comp?.gstin,
-        id: comp?.id,
-        name: comp?.name,
-        stateName: comp?.stateName,
-      });
+      setValue(
+        "company",
+        {
+          address: comp?.address,
+          gstin: comp?.gstin,
+          id: comp?.id,
+          name: comp?.name,
+          stateName: comp?.stateName,
+        },
+        {
+          shouldValidate: true,
+        },
+      );
     }
   };
 
@@ -319,13 +325,19 @@ export const CreateInvoicePage: React.FC = () => {
   const handlePartyChange = (id: Number) => {
     const party = parties.find((p) => p.id === id);
     if (party) {
-      setValue("party", {
-        address: party?.address,
-        gstin: party?.gstin,
-        id: party?.id,
-        name: party?.name,
-        stateName: party?.stateName,
-      });
+      setValue(
+        "party",
+        {
+          address: party?.address,
+          gstin: party?.gstin,
+          id: party?.id,
+          name: party?.name,
+          stateName: party?.stateName,
+        },
+        {
+          shouldValidate: true,
+        },
+      );
     }
   };
 
@@ -333,10 +345,16 @@ export const CreateInvoicePage: React.FC = () => {
   const handleSelectProduct = (index: number, prodId: Number) => {
     const prod = products.find((p) => p.id === prodId);
     if (prod) {
-      setValue(`items.${index}.product`, {
-        id: prod?.id,
-        name: prod?.name,
-      });
+      setValue(
+        `items.${index}.product`,
+        {
+          id: prod?.id,
+          name: prod?.name,
+        },
+        {
+          shouldValidate: true,
+        },
+      );
     }
   };
 
@@ -346,7 +364,7 @@ export const CreateInvoicePage: React.FC = () => {
     field: "quantity" | "rate",
     value: number,
   ) => {
-    setValue(`items.${index}.${field}`, value);
+    setValue(`items.${index}.${field}`, value, { shouldValidate: true });
     const currentQty =
       field === "quantity" ? value : getValues(`items.${index}.quantity`) || 0;
     const currentRate =
