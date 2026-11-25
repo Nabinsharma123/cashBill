@@ -1,14 +1,44 @@
 export interface ElectronAPI {
   // Companies
   getCompanies: () => Promise<any[]>;
-  createCompany: (data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => Promise<any>;
-  updateCompany: (id: number, data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => Promise<any>;
+  createCompany: (data: {
+    name: string;
+    address: string;
+    gstin: string;
+    stateName?: string;
+    state_name?: string;
+  }) => Promise<any>;
+  updateCompany: (
+    id: number,
+    data: {
+      name: string;
+      address: string;
+      gstin: string;
+      stateName?: string;
+      state_name?: string;
+    },
+  ) => Promise<any>;
   deleteCompany: (id: number) => Promise<{ success: boolean }>;
 
   // Parties
   getParties: () => Promise<any[]>;
-  createParty: (data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => Promise<any>;
-  updateParty: (id: number, data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => Promise<any>;
+  createParty: (data: {
+    name: string;
+    address: string;
+    gstin: string;
+    stateName?: string;
+    state_name?: string;
+  }) => Promise<any>;
+  updateParty: (
+    id: number,
+    data: {
+      name: string;
+      address: string;
+      gstin: string;
+      stateName?: string;
+      state_name?: string;
+    },
+  ) => Promise<any>;
   deleteParty: (id: number) => Promise<{ success: boolean }>;
 
   // Products
@@ -18,7 +48,11 @@ export interface ElectronAPI {
   deleteProduct: (id: number) => Promise<{ success: boolean }>;
 
   // Invoices
-  getInvoices: (params?: { page?: number; limit?: number; search?: string }) => Promise<{
+  getInvoices: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) => Promise<{
     data: any[];
     total: number;
     page: number;
@@ -30,17 +64,20 @@ export interface ElectronAPI {
   deleteInvoice: (id: number) => Promise<{ success: boolean }>;
 
   // Native PDF & Print
-  exportPdf: (defaultFilename: string) => Promise<{ success: boolean; filePath?: string; canceled?: boolean; error?: string }>;
+  exportPdf: (
+    defaultFilename: string,
+  ) => Promise<{
+    success: boolean;
+    filePath?: string;
+    canceled?: boolean;
+    error?: string;
+  }>;
   printInvoice: () => Promise<{
     success: boolean;
     canceled?: boolean;
     noPrinters?: boolean;
     error?: string;
   }>;
-
-  // Window Controls
-  toggleFullscreen: () => Promise<boolean>;
-  toggleMaximize: () => Promise<boolean>;
 }
 
 declare global {
