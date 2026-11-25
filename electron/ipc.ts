@@ -236,8 +236,22 @@ export function registerIpcHandlers() {
     }
   });
 
-  ipcMain.handle("invoices:print", (event) => {
-    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+  ipcMain.handle("invoices:print", async (event) => {
+    const printers = await event.sender.getPrintersAsync();
+    if (!printers || printers.length === 0) {
+      return {
+        success: false,
+        noPrinters: true,
+        error: "No printer found on this system",
+      };
+    }
+
+    return new Promise<{
+      success: boolean;
+      canceled?: boolean;
+      noPrinters?: boolean;
+      error?: string;
+    }>((resolve) => {
       event.sender.print(
         {
           silent: false,
@@ -246,10 +260,12 @@ export function registerIpcHandlers() {
         (success, failureReason) => {
           if (success) {
             resolve({ success: true });
+          } else if (failureReason?.toLowerCase().includes("cancel")) {
+            resolve({ success: false, canceled: true });
           } else {
             resolve({
               success: false,
-              error: failureReason || "Print canceled or failed",
+              error: failureReason || "Unable to open print dialog.",
             });
           }
         },

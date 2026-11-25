@@ -31,7 +31,12 @@ export interface ElectronAPI {
 
   // Native PDF & Print
   exportPdf: (defaultFilename: string) => Promise<{ success: boolean; filePath?: string; canceled?: boolean; error?: string }>;
-  printInvoice: () => Promise<{ success: boolean; error?: string }>;
+  printInvoice: () => Promise<{
+    success: boolean;
+    canceled?: boolean;
+    noPrinters?: boolean;
+    error?: string;
+  }>;
 
   // Window Controls
   toggleFullscreen: () => Promise<boolean>;

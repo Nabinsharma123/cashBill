@@ -372,13 +372,26 @@ export const CreateInvoicePage: React.FC = () => {
   const printCurrentInvoice = async () => {
     try {
       if (window.electronAPI?.printInvoice) {
-        await window.electronAPI.printInvoice();
+        const res = await window.electronAPI.printInvoice();
+        if (!res.success && !res.canceled) {
+          showAlert({
+            title: res.noPrinters ? "No Printer Found" : "Print Failed",
+            message: res.error || "No printer found on this system",
+            variant: res.noPrinters
+              ? AlertVariant.WARNING
+              : AlertVariant.DESTRUCTIVE,
+          });
+        }
       } else {
         window.print();
       }
     } catch (err: any) {
       console.error("Print failed:", err);
-      window.print();
+      showAlert({
+        title: "Print Error",
+        message: err?.message || String(err),
+        variant: AlertVariant.DESTRUCTIVE,
+      });
     }
   };
 
