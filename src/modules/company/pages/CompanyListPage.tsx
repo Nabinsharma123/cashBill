@@ -1,22 +1,27 @@
-import React, { useState } from "react";
-import { useGetAllCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } from "../hooks";
-import { CompanyFormDialog } from "../components/CompanyFormDialog";
-import { TCompanySchema } from "../schema";
-import { useAlert } from "@/context/AlertDialogContext";
-import { AlertVariant } from "@/constants/enums";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Table,
-  TableHeader,
-  TableRow,
-  TableHead,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Building2, Pencil, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { AlertVariant } from "@/constants/enums";
+import { useAlert } from "@/context/AlertDialogContext";
+import { Building2, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { CompanyFormDialog } from "../components/CompanyFormDialog";
+import {
+  useCreateCompany,
+  useDeleteCompany,
+  useGetAllCompanies,
+  useUpdateCompany,
+} from "../hooks";
+import { TCompanySchema } from "../schema";
 
 export const CompanyListPage: React.FC = () => {
   const { data: companies = [], isLoading } = useGetAllCompanies();
@@ -25,20 +30,24 @@ export const CompanyListPage: React.FC = () => {
   const deleteMutation = useDeleteCompany();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<TCompanySchema["Doc"] | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<
+    TCompanySchema["Doc"] | null
+  >(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { showConfirm, showAlert } = useAlert();
 
-  const filteredCompanies = companies.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.gstin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.stateName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCompanies = companies.filter(
+    (c) =>
+      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.gstin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.stateName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleDelete = (id: number) => {
     showConfirm({
       title: "Delete Company",
-      message: "Are you sure you want to delete this company? This action cannot be undone.",
+      message:
+        "Are you sure you want to delete this company? This action cannot be undone.",
       confirmText: "Delete",
       variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
@@ -59,7 +68,6 @@ export const CompanyListPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Companies"
-        description="Manage your manufacturing entities and issuing company profiles."
         icon={Building2}
         actions={
           <Button
@@ -77,12 +85,6 @@ export const CompanyListPage: React.FC = () => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <CardTitle>Company Directory</CardTitle>
-              <CardDescription>
-                {companies.length} {companies.length === 1 ? "company" : "companies"} registered
-              </CardDescription>
-            </div>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -96,35 +98,52 @@ export const CompanyListPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading companies...</div>
+            <div className="text-center py-12 text-muted-foreground">
+              Loading companies...
+            </div>
           ) : filteredCompanies.length === 0 ? (
             <div className="text-center py-12">
               <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-              <p className="text-muted-foreground font-medium">No companies found</p>
+              <p className="text-muted-foreground font-medium">
+                No companies found
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {searchTerm ? "Try adjusting your search criteria" : "Click 'Add Company' to create your first company"}
+                {searchTerm
+                  ? "Try adjusting your search criteria"
+                  : "Click 'Add Company' to create your first company"}
               </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[60px]">ID</TableHead>
+                  <TableHead className="w-[60px]">No.</TableHead>
                   <TableHead>Company Name</TableHead>
                   <TableHead>GSTIN / UIN</TableHead>
                   <TableHead>State</TableHead>
                   <TableHead>Address</TableHead>
-                  <TableHead className="text-right w-[110px]">Actions</TableHead>
+                  <TableHead className="text-right w-[110px]">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCompanies.map((c) => (
+                {filteredCompanies.map((c, index) => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-mono text-xs text-muted-foreground">#{c.id}</TableCell>
-                    <TableCell className="font-semibold text-foreground">{c.name}</TableCell>
-                    <TableCell className="font-mono text-xs">{c.gstin}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className="font-semibold text-foreground">
+                      {c.name}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {c.gstin}
+                    </TableCell>
                     <TableCell>{c.stateName}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs max-w-xs truncate" title={c.address}>
+                    <TableCell
+                      className="text-muted-foreground text-xs max-w-xs truncate"
+                      title={c.address}
+                    >
                       {c.address}
                     </TableCell>
                     <TableCell className="text-right">

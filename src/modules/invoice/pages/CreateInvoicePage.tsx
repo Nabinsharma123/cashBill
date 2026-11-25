@@ -4,8 +4,8 @@ import { useCreateProduct, useGetAllProducts } from "@/modules/product/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
-import React, { useEffect, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import React, { useEffect, useMemo, useState } from "react";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCreateInvoice } from "../hooks";
 import { invoiceFormSchema, InvoiceFormSchemaType } from "../zod";
 
@@ -157,7 +157,7 @@ export const CreateInvoicePage: React.FC = () => {
   // Watch form fields for live preview and reactive computations
   const formValues = watch();
 
-  const companyOptions: ComboboxOption[] = React.useMemo(
+  const companyOptions: ComboboxOption[] = useMemo(
     () =>
       companies.map((c) => ({
         value: c.id,
@@ -168,7 +168,7 @@ export const CreateInvoicePage: React.FC = () => {
     [companies],
   );
 
-  const partyOptions: ComboboxOption[] = React.useMemo(
+  const partyOptions: ComboboxOption[] = useMemo(
     () =>
       parties.map((p) => ({
         value: p.id,
@@ -179,7 +179,7 @@ export const CreateInvoicePage: React.FC = () => {
     [parties],
   );
 
-  const productOptions: ComboboxOption[] = React.useMemo(
+  const productOptions: ComboboxOption[] = useMemo(
     () =>
       products.map((p) => ({
         value: p.id,
@@ -190,15 +190,27 @@ export const CreateInvoicePage: React.FC = () => {
     [products],
   );
 
-  const watchedItems = formValues.items || [];
-  const watchedGstEntries = formValues.gstEntries || [];
-  const watchedTaxPreset = formValues.taxPreset;
-  const watchedRoundOff = Number(formValues.roundOff) || 0;
+  const watchedItems = useWatch({
+    control,
+    name: "items",
+    defaultValue: [],
+  });
+  const watchedGstEntries = useWatch({
+    control,
+    name: "gstEntries",
+    defaultValue: [],
+  });
+
+  const watchedRoundOff = useWatch({
+    control,
+    name: "roundOff",
+    defaultValue: 0,
+  });
   const watchedCompanyId = formValues.companyId;
   const watchedPartyId = formValues.partyId;
 
   useEffect(() => {
-    if (!watchedCompanyId && companies.length > 0) {
+    if (companies.length > 0) {
       const first = companies[0];
       setValue("companyId", first.id);
       setValue("companyName", first.name);
@@ -206,52 +218,64 @@ export const CreateInvoicePage: React.FC = () => {
       setValue("companyGstin", first.gstin);
       setValue("companyStateName", first.stateName);
     }
-  }, [companies, watchedCompanyId, setValue]);
+  }, [companies, setValue]);
 
   // Derived calculations
-  const subtotal = watchedItems.reduce(
-    (acc, it) => acc + (Number(it.amount) || 0),
-    0,
+  const subtotal = useMemo(
+    () => watchedItems.reduce((acc, it) => acc + (Number(it.amount) || 0), 0),
+    [watchedItems],
   );
 
   // Sync tax preset rates & amounts with subtotal
   useEffect(() => {
-    if (watchedTaxPreset === TaxPreset.IGST_18) {
-      const amt = Number(((subtotal * 18) / 100).toFixed(2));
+    const newGstEntries = watchedGstEntries?.map((item) => {
+      return {
+        ...item,
+        amount: Number(((subtotal * item?.rate) / 100).toFixed(2)),
+      };
+    });
+
+    setValue("gstEntries", newGstEntries);
+  }, [subtotal, watchedGstEntries, setValue]);
+
+  const onGstPresetChange = (value: TaxPreset) => {
+    setValue("taxPreset", value);
+    if (value === TaxPreset.IGST_18) {
       setValue("gstEntries", [
         {
-          id: "gst-igst-18",
+          id: nanoid(5),
           type: GstType.IGST,
           rate: GstRate.RATE_18,
-          amount: amt,
+          amount: 0,
         },
       ]);
-    } else if (watchedTaxPreset === TaxPreset.CGST_SGST_9) {
-      const halfAmt = Number(((subtotal * 9) / 100).toFixed(2));
+    } else if (value === TaxPreset.CGST_SGST_9) {
       setValue("gstEntries", [
         {
-          id: "gst-cgst-9",
+          id: nanoid(5),
           type: GstType.CGST,
           rate: GstRate.RATE_9,
-          amount: halfAmt,
+          amount: 0,
         },
         {
-          id: "gst-sgst-9",
+          id: nanoid(5),
           type: GstType.SGST,
           rate: GstRate.RATE_9,
-          amount: halfAmt,
+          amount: 0,
         },
       ]);
     }
-  }, [subtotal, watchedTaxPreset, setValue]);
+  };
 
-  const totalGst = watchedGstEntries.reduce(
-    (acc, g) => acc + (Number(g.amount) || 0),
-    0,
+  const totalGst = useMemo(
+    () =>
+      watchedGstEntries.reduce((acc, g) => acc + (Number(g.amount) || 0), 0),
+    [watchedGstEntries],
   );
 
-  const totalAmount = Number(
-    (subtotal + totalGst + watchedRoundOff).toFixed(2),
+  const totalAmount = useMemo(
+    () => subtotal + totalGst + watchedRoundOff,
+    [subtotal, totalGst, watchedRoundOff],
   );
 
   // Auto round-off calculation
@@ -919,7 +943,9 @@ export const CreateInvoicePage: React.FC = () => {
                   <FieldContent>
                     <RadioGroup
                       value={field?.value}
-                      onValueChange={field?.onChange}
+                      onValueChange={(value) => {
+                        onGstPresetChange(value as TaxPreset);
+                      }}
                       className="flex flex-col sm:flex-row gap-4 pt-1"
                     >
                       {TAX_PRESET_OPTIONS.map((opt) => (
@@ -961,7 +987,7 @@ export const CreateInvoicePage: React.FC = () => {
                   onClick={() => {
                     setValue("taxPreset", TaxPreset.CUSTOM);
                     appendGst({
-                      id: `gst-${Date.now()}-${gstFields.length + 1}`,
+                      id: nanoid(5),
                       type: GstType.GST,
                       rate: GstRate.RATE_18,
                       amount: Number(((subtotal * 18) / 100).toFixed(2)),

@@ -1,23 +1,28 @@
-import React, { useState } from "react";
-import { useGetAllProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "../hooks";
-import { ProductFormDialog } from "../components/ProductFormDialog";
-import { TProductSchema } from "../schema";
-import { useAlert } from "@/context/AlertDialogContext";
-import { AlertVariant } from "@/constants/enums";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
-  TableHeader,
-  TableRow,
-  TableHead,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Package, Pencil, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { AlertVariant } from "@/constants/enums";
+import { useAlert } from "@/context/AlertDialogContext";
+import { Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { ProductFormDialog } from "../components/ProductFormDialog";
+import {
+  useCreateProduct,
+  useDeleteProduct,
+  useGetAllProducts,
+  useUpdateProduct,
+} from "../hooks";
+import { TProductSchema } from "../schema";
 
 export const ProductListPage: React.FC = () => {
   const { data: products = [], isLoading } = useGetAllProducts();
@@ -26,19 +31,23 @@ export const ProductListPage: React.FC = () => {
   const deleteMutation = useDeleteProduct();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<TProductSchema["Doc"] | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<
+    TProductSchema["Doc"] | null
+  >(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { showConfirm, showAlert } = useAlert();
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.tags && p.tags.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.tags && p.tags.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const handleDelete = (id: number) => {
     showConfirm({
       title: "Delete Product",
-      message: "Are you sure you want to delete this product? This action cannot be undone.",
+      message:
+        "Are you sure you want to delete this product? This action cannot be undone.",
       confirmText: "Delete",
       variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
@@ -59,7 +68,6 @@ export const ProductListPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Products"
-        description="Manage manufactured goods, item descriptions, and search tags."
         icon={Package}
         actions={
           <Button
@@ -77,12 +85,6 @@ export const ProductListPage: React.FC = () => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <CardTitle>Product Catalog</CardTitle>
-              <CardDescription>
-                {products.length} {products.length === 1 ? "product" : "products"} available
-              </CardDescription>
-            </div>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -96,40 +98,58 @@ export const ProductListPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading products...</div>
+            <div className="text-center py-12 text-muted-foreground">
+              Loading products...
+            </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-              <p className="text-muted-foreground font-medium">No products found</p>
+              <p className="text-muted-foreground font-medium">
+                No products found
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {searchTerm ? "Try adjusting your search criteria" : "Click 'Add Product' to create your first item"}
+                {searchTerm
+                  ? "Try adjusting your search criteria"
+                  : "Click 'Add Product' to create your first item"}
               </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[60px]">ID</TableHead>
-                  <TableHead>Product Name / Description</TableHead>
+                  <TableHead className="w-[60px]">No.</TableHead>
+                  <TableHead>Product Name</TableHead>
                   <TableHead>Tags</TableHead>
-                  <TableHead className="text-right w-[110px]">Actions</TableHead>
+                  <TableHead className="text-right w-[110px]">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((p) => (
+                {filteredProducts.map((p, index) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-mono text-xs text-muted-foreground">#{p.id}</TableCell>
-                    <TableCell className="font-semibold text-foreground">{p.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className="font-semibold text-foreground">
+                      {p.name}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {p.tags ? (
                           p.tags.split(",").map((t, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {t.trim()}
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-muted-foreground text-xs italic">No tags</span>
+                          <span className="text-muted-foreground text-xs italic">
+                            No tags
+                          </span>
                         )}
                       </div>
                     </TableCell>

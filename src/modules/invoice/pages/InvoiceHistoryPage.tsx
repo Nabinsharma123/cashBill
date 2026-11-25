@@ -1,39 +1,41 @@
-import React, { useState } from "react";
-import { useGetPaginatedInvoices, useDeleteInvoice } from "../hooks";
-import { TInvoiceSchema } from "../schema";
-import { InvoiceViewModal } from "../components/InvoiceViewModal";
-import { TableFooter } from "@/components/table/TableFooter";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { usePaginationPayload } from "@/hooks/use-pagination-payload";
-import { useAlert } from "@/context/AlertDialogContext";
+import { TableFooter } from "@/components/table/TableFooter";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Table,
-  TableHeader,
-  TableRow,
-  TableHead,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { formatINR, formatDateDisplay } from "@/lib/utils";
 import { AlertVariant, InvoiceModalMode } from "@/constants/enums";
+import { useAlert } from "@/context/AlertDialogContext";
+import { usePaginationPayload } from "@/hooks/use-pagination-payload";
+import { formatDateDisplay, formatINR } from "@/lib/utils";
 import {
-  Search,
-  FileText,
-  Eye,
-  Printer,
   Download,
-  Trash2,
+  Eye,
+  FileText,
   Plus,
+  Printer,
+  Search,
+  Trash2,
 } from "lucide-react";
+import React, { useState } from "react";
+import { InvoiceViewModal } from "../components/InvoiceViewModal";
+import { useDeleteInvoice, useGetPaginatedInvoices } from "../hooks";
+import { TInvoiceSchema } from "../schema";
 
 interface InvoiceHistoryPageProps {
   onNavigateCreate: () => void;
 }
 
-export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNavigateCreate }) => {
+export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({
+  onNavigateCreate,
+}) => {
   const {
     payload,
     search,
@@ -51,7 +53,9 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
   const totalInvoices = paginationData?.total || 0;
   const totalPages = paginationData?.totalPages || 1;
 
-  const [selectedInvoice, setSelectedInvoice] = useState<TInvoiceSchema["Doc"] | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<
+    TInvoiceSchema["Doc"] | null
+  >(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { showConfirm, showAlert } = useAlert();
 
@@ -75,8 +79,12 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
 
   const handleExportPdf = async (filename?: string) => {
     try {
-      const invNo = selectedInvoice ? (selectedInvoice.invoiceNo || (selectedInvoice as any).invoice_no) : "Invoice";
-      const defaultName = filename || `Invoice_${String(invNo).replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
+      const invNo = selectedInvoice
+        ? selectedInvoice.invoiceNo || (selectedInvoice as any).invoice_no
+        : "Invoice";
+      const defaultName =
+        filename ||
+        `Invoice_${String(invNo).replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
       if (window.electronAPI?.exportPdf) {
         const res = await window.electronAPI.exportPdf(defaultName);
         if (res.success) {
@@ -88,7 +96,8 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
         } else if (!res.canceled) {
           showAlert({
             title: "Export Failed",
-            message: res.error || "Unknown error occurred while generating PDF.",
+            message:
+              res.error || "Unknown error occurred while generating PDF.",
             variant: AlertVariant.DESTRUCTIVE,
           });
         }
@@ -112,7 +121,8 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
   const handleDelete = (id: number) => {
     showConfirm({
       title: "Delete Invoice",
-      message: "Are you sure you want to delete this invoice? This action cannot be undone.",
+      message:
+        "Are you sure you want to delete this invoice? This action cannot be undone.",
       confirmText: "Delete",
       variant: AlertVariant.DESTRUCTIVE,
       onConfirm: async () => {
@@ -134,10 +144,12 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
     <div className="space-y-6">
       <PageHeader
         title="Invoice History"
-        description="Browse, view, print, and export all generated proforma and tax invoices."
         icon={FileText}
         actions={
-          <Button onClick={onNavigateCreate} className="flex items-center gap-2">
+          <Button
+            onClick={onNavigateCreate}
+            className="flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" /> Create New Invoice
           </Button>
         }
@@ -147,12 +159,6 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <CardTitle>Invoices Archive</CardTitle>
-              <CardDescription>
-                Showing {invoices.length} of {totalInvoices} records (Page {payload.page} of {totalPages})
-              </CardDescription>
-            </div>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -166,11 +172,15 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading invoices...</div>
+            <div className="text-center py-12 text-muted-foreground">
+              Loading invoices...
+            </div>
           ) : invoices.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-              <p className="text-muted-foreground font-medium">No invoices found</p>
+              <p className="text-muted-foreground font-medium">
+                No invoices found
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {search
                   ? "No matching records found. Try clearing your search."
@@ -187,16 +197,21 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
                     <TableHead>Issuer Company</TableHead>
                     <TableHead>Buyer (Bill to)</TableHead>
                     <TableHead className="text-right">Amount (₹)</TableHead>
-                    <TableHead className="text-right w-[150px]">Actions</TableHead>
+                    <TableHead className="text-right w-[150px]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {invoices.map((inv) => {
                     const invoiceNo = inv.invoiceNo || (inv as any).invoice_no;
-                    const invoiceDate = inv.invoiceDate || (inv as any).invoice_date;
-                    const companyName = inv.companyName || (inv as any).company_name;
+                    const invoiceDate =
+                      inv.invoiceDate || (inv as any).invoice_date;
+                    const companyName =
+                      inv.companyName || (inv as any).company_name;
                     const partyName = inv.partyName || (inv as any).party_name;
-                    const totalAmount = inv.totalAmount ?? (inv as any).total_amount;
+                    const totalAmount =
+                      inv.totalAmount ?? (inv as any).total_amount;
 
                     return (
                       <TableRow key={inv.id}>
@@ -248,7 +263,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({ onNaviga
                               size="icon"
                               onClick={() =>
                                 handleExportPdf(
-                                  `Invoice_${String(invoiceNo).replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`
+                                  `Invoice_${String(invoiceNo).replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`,
                                 )
                               }
                               title="Download PDF"
