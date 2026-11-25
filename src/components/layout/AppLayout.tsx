@@ -53,12 +53,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <div className="flex h-full w-full bg-background overflow-hidden">
       {/* Sidebar (hidden during printing) */}
-      <aside className="no-print w-64 border-r bg-card/60 flex flex-col justify-between shrink-0 select-none">
+      <aside className="no-print w-64 border-r border-border bg-card flex flex-col justify-between shrink-0 select-none">
         <div>
           {/* Logo / App Header */}
-          <div className="p-4 border-b flex items-center justify-between">
+          <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow">
+              <div className="h-9 w-9 rounded-md border border-primary bg-primary text-primary-foreground flex items-center justify-center shadow-[0_1px_1px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.2)]">
                 <Receipt className="h-5 w-5" />
               </div>
               <div>
@@ -78,10 +78,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-left ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all text-left border ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      ? "border-primary bg-primary text-primary-foreground shadow-[0_1px_1px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.2)]"
+                      : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground hover:border-border"
                   }`}
                 >
                   <Icon
