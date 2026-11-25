@@ -1,16 +1,23 @@
-import { GstType, TaxPreset } from "@/constants/enums";
+import { GstType, QuantityUnit, TaxPreset } from "@/constants/enums";
 import { numberSchema, stringSchema } from "@/lib/zod";
 import { z } from "zod";
 
 export const invoiceItemFormSchema = z.object({
   id: stringSchema("Item ID"),
-  productId: numberSchema("Product ID"),
-  productName: stringSchema("Product Name", 1, 500),
+  product: z.object(
+    {
+      id: numberSchema("Product ID"),
+      name: stringSchema("Product Name", 1, 500),
+    },
+    {
+      message: "Product is required",
+    },
+  ),
   quantity: numberSchema("Quantity").positive(
     "Quantity must be greater than 0",
   ),
   rate: numberSchema("Rate", 0),
-  per: stringSchema("Unit", 1, 50),
+  per: z.nativeEnum(QuantityUnit),
   amount: numberSchema("Amount", 0),
 });
 
@@ -29,16 +36,31 @@ export const invoiceFormSchema = z.object({
   invoiceNo: stringSchema("Invoice number", 1, 100),
   invoiceTitle: stringSchema("Invoice title", 1, 100),
   invoiceDate: stringSchema("Date", 1, 50),
-  companyId: numberSchema("Company"),
-  partyId: numberSchema("Party"),
-  companyName: stringSchema("Company name"),
-  companyAddress: stringSchema("Company address"),
-  companyGstin: stringSchema("Company GSTIN", 1, 50),
-  companyStateName: stringSchema("Company state", 1, 100),
-  partyName: stringSchema("Party name"),
-  partyAddress: stringSchema("Party address"),
-  partyGstin: stringSchema("Party GSTIN", 1, 50),
-  partyStateName: stringSchema("Party state", 1, 100),
+  company: z.object(
+    {
+      id: numberSchema("Company"),
+      name: stringSchema("Company name"),
+      address: stringSchema("Company address"),
+      gstin: stringSchema("Company GSTIN", 1, 50),
+      stateName: stringSchema("Company state", 1, 100),
+    },
+    {
+      message: "Company is required",
+    },
+  ),
+
+  party: z.object(
+    {
+      id: numberSchema("Party"),
+      name: stringSchema("Party name"),
+      address: stringSchema("Party address"),
+      gstin: stringSchema("Party GSTIN", 1, 50),
+      stateName: stringSchema("Party state", 1, 100),
+    },
+    {
+      message: "Party is required",
+    },
+  ),
   items: z.array(invoiceItemFormSchema).min(1, "Add at least one product item"),
   taxPreset: z.nativeEnum(TaxPreset).default(TaxPreset.IGST_18),
   gstEntries: z.array(gstEntryFormSchema),

@@ -15,15 +15,7 @@ import { AlertVariant, InvoiceModalMode } from "@/constants/enums";
 import { useAlert } from "@/context/AlertDialogContext";
 import { usePaginationPayload } from "@/hooks/use-pagination-payload";
 import { formatDateDisplay, formatINR } from "@/lib/utils";
-import {
-  Download,
-  Eye,
-  FileText,
-  Plus,
-  Printer,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { Eye, FileText, Plus, Search, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { InvoiceViewModal } from "../components/InvoiceViewModal";
 import { useDeleteInvoice, useGetPaginatedInvoices } from "../hooks";
@@ -54,13 +46,48 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({
   const totalPages = paginationData?.totalPages || 1;
 
   const [selectedInvoice, setSelectedInvoice] = useState<
-    TInvoiceSchema["Doc"] | null
+    TInvoiceSchema["Preview"] | null
   >(null);
+
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { showConfirm, showAlert } = useAlert();
 
   const handleOpenView = (inv: TInvoiceSchema["Doc"]) => {
-    setSelectedInvoice(inv);
+    setSelectedInvoice({
+      company: {
+        address: inv?.companyAddress,
+        gstin: inv?.companyGstin,
+        id: inv?.companyId,
+        name: inv?.companyName,
+        stateName: inv?.companyStateName,
+      },
+      party: {
+        address: inv?.partyAddress,
+        gstin: inv?.partyGstin,
+        id: inv?.partyId,
+        name: inv?.partyName,
+        stateName: inv?.partyStateName,
+      },
+      declaration: inv?.declaration,
+      gstEntries: inv?.gstEntries,
+      invoiceDate: inv?.invoiceDate,
+      invoiceNo: inv?.invoiceNo,
+      invoiceTitle: inv?.invoiceTitle,
+      roundOff: inv?.roundOff,
+      items: (inv?.items || [])?.map((item) => ({
+        amount: item?.amount,
+        id: item?.id,
+        per: item?.per,
+        product: {
+          id: item?.productId,
+          name: item?.productName,
+        },
+        quantity: item?.quantity,
+        rate: item?.rate,
+      })),
+      subtotal: inv?.subtotal,
+      totalAmount: inv?.totalAmount,
+    });
     setIsViewModalOpen(true);
   };
 
@@ -246,30 +273,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setSelectedInvoice(inv);
-                                setIsViewModalOpen(true);
-                                setTimeout(() => handlePrint(), 200);
-                              }}
-                              title="Print"
-                            >
-                              <Printer className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                handleExportPdf(
-                                  `Invoice_${String(invoiceNo).replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`,
-                                )
-                              }
-                              title="Download PDF"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
+
                             <Button
                               variant="ghost"
                               size="icon"
@@ -307,7 +311,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({
 
       {/* View Modal */}
       <InvoiceViewModal
-        invoice={selectedInvoice}
+        invoice={selectedInvoice as TInvoiceSchema["Preview"]}
         isOpen={isViewModalOpen}
         type={InvoiceModalMode.PREVIEW_WITH_PRINT}
         onClose={() => {

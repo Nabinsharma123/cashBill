@@ -1,20 +1,20 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { productFormSchema, ProductFormSchemaType } from "../zod";
-import { TProductSchema } from "../schema";
-import { useAlert } from "@/context/AlertDialogContext";
-import { AlertVariant } from "@/constants/enums";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AlertVariant } from "@/constants/enums";
+import { useAlert } from "@/context/AlertDialogContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { TProductSchema } from "../schema";
+import { productFormSchema, ProductFormSchemaType } from "../zod";
 
 interface ProductFormDialogProps {
   isOpen: boolean;
@@ -78,7 +78,7 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
+        <form className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="prod-name">Product Name / Description *</Label>
             <Input
@@ -95,8 +95,16 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : initialData ? "Save Changes" : "Create Product"}
+            <Button
+              type="button"
+              onClick={handleSubmit(onFormSubmit)}
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Saving..."
+                : initialData
+                  ? "Save Changes"
+                  : "Create Product"}
             </Button>
           </DialogFooter>
         </form>

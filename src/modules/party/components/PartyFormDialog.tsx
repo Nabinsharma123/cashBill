@@ -1,21 +1,21 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { partyFormSchema, PartyFormSchemaType } from "../zod";
-import { TPartySchema } from "../schema";
-import { useAlert } from "@/context/AlertDialogContext";
-import { AlertVariant } from "@/constants/enums";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertVariant } from "@/constants/enums";
+import { useAlert } from "@/context/AlertDialogContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { TPartySchema } from "../schema";
+import { partyFormSchema, PartyFormSchemaType } from "../zod";
 
 interface PartyFormDialogProps {
   isOpen: boolean;
@@ -94,7 +94,7 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 py-2">
+        <form className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="party-name">Party / Buyer Name *</Label>
             <Input
@@ -116,7 +116,9 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
               {...register("address")}
             />
             {errors.address && (
-              <p className="text-xs text-destructive">{errors.address.message}</p>
+              <p className="text-xs text-destructive">
+                {errors.address.message}
+              </p>
             )}
           </div>
 
@@ -131,7 +133,9 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
                 onChange={handleGstinChange}
               />
               {errors.gstin && (
-                <p className="text-xs text-destructive">{errors.gstin.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.gstin.message}
+                </p>
               )}
             </div>
 
@@ -154,8 +158,16 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : initialData ? "Save Changes" : "Create Party"}
+            <Button
+              type="button"
+              onClick={handleSubmit(onFormSubmit)}
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Saving..."
+                : initialData
+                  ? "Save Changes"
+                  : "Create Party"}
             </Button>
           </DialogFooter>
         </form>

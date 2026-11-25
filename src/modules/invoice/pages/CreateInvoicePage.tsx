@@ -7,7 +7,11 @@ import { nanoid } from "nanoid";
 import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCreateInvoice } from "../hooks";
-import { invoiceFormSchema, InvoiceFormSchemaType } from "../zod";
+import {
+  invoiceFormSchema,
+  InvoiceFormSchemaType,
+  InvoiceItemFormSchemaType,
+} from "../zod";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useAlert } from "@/context/AlertDialogContext";
@@ -59,7 +63,16 @@ import {
   TAX_PRESET_OPTIONS,
   TaxPreset,
 } from "@/constants/enums";
-import { Building2, Eye, Package, Percent, Plus, Save, Trash2 } from "lucide-react";
+import {
+  Building2,
+  Eye,
+  Package,
+  Percent,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
+import { TInvoiceSchema } from "../schema";
 
 export const CreateInvoicePage: React.FC = () => {
   // TanStack Query Hooks
@@ -101,23 +114,12 @@ export const CreateInvoicePage: React.FC = () => {
       invoiceNo: "",
       invoiceTitle: InvoiceTitle.PROFORMA,
       invoiceDate: dayjs().format("YYYY-MM-DD"),
-      companyId: NaN,
-      partyId: NaN,
-      companyName: "",
-      companyAddress: "",
-      companyGstin: "",
-      companyStateName: "",
-      partyName: "",
-      partyAddress: "",
-      partyGstin: "",
-      partyStateName: "",
       items: [
         {
           amount: 0,
           id: nanoid(5),
           per: QuantityUnit.SET,
-          productId: NaN,
-          productName: "",
+
           quantity: 1,
           rate: 0,
         },
@@ -205,17 +207,26 @@ export const CreateInvoicePage: React.FC = () => {
     name: "roundOff",
     defaultValue: 0,
   });
-  const watchedCompanyId = formValues.companyId;
-  const watchedPartyId = formValues.partyId;
+  const watchedSelectedCompany = useWatch({
+    control,
+    name: "company",
+  });
+  const watchedSelectedParty = useWatch({
+    control,
+    name: "party",
+  });
 
   useEffect(() => {
     if (companies.length > 0) {
       const first = companies[0];
-      setValue("companyId", first.id);
-      setValue("companyName", first.name);
-      setValue("companyAddress", first.address);
-      setValue("companyGstin", first.gstin);
-      setValue("companyStateName", first.stateName);
+
+      setValue("company", {
+        address: first?.address,
+        gstin: first?.gstin,
+        id: first?.id,
+        name: first.name,
+        stateName: first?.stateName,
+      });
     }
   }, [companies, setValue]);
 
@@ -286,38 +297,41 @@ export const CreateInvoicePage: React.FC = () => {
   };
 
   // Company selection change
-  const handleCompanyChange = (idStr: string) => {
-    const id = Number(idStr);
+  const handleCompanyChange = (id: number) => {
     const comp = companies.find((c) => c.id === id);
     if (comp) {
-      setValue("companyId", comp.id);
-      setValue("companyName", comp.name);
-      setValue("companyAddress", comp.address);
-      setValue("companyGstin", comp.gstin);
-      setValue("companyStateName", comp.stateName);
+      setValue("company", {
+        address: comp?.address,
+        gstin: comp?.gstin,
+        id: comp?.id,
+        name: comp?.name,
+        stateName: comp?.stateName,
+      });
     }
   };
 
   // Party selection change
-  const handlePartyChange = (idStr: string) => {
-    const id = Number(idStr);
+  const handlePartyChange = (id: Number) => {
     const party = parties.find((p) => p.id === id);
     if (party) {
-      setValue("partyId", party.id);
-      setValue("partyName", party.name);
-      setValue("partyAddress", party.address);
-      setValue("partyGstin", party.gstin);
-      setValue("partyStateName", party.stateName);
+      setValue("party", {
+        address: party?.address,
+        gstin: party?.gstin,
+        id: party?.id,
+        name: party?.name,
+        stateName: party?.stateName,
+      });
     }
   };
 
   // Product selection in item row
-  const handleSelectProduct = (index: number, productIdStr: string) => {
-    const prodId = Number(productIdStr);
+  const handleSelectProduct = (index: number, prodId: Number) => {
     const prod = products.find((p) => p.id === prodId);
     if (prod) {
-      setValue(`items.${index}.productId`, prodId);
-      setValue(`items.${index}.productName`, prod.name);
+      setValue(`items.${index}.product`, {
+        id: prod?.id,
+        name: prod?.name,
+      });
     }
   };
 
@@ -390,30 +404,23 @@ export const CreateInvoicePage: React.FC = () => {
   };
 
   // Build current invoice object from form state
-  const buildCurrentInvoiceData = (formData: InvoiceFormSchemaType) => {
-    const vals = formData;
+  const buildCurrentInvoiceData = (
+    value: InvoiceFormSchemaType,
+  ): TInvoiceSchema["Preview"] => {
     return {
-      invoiceNo: vals.invoiceNo || "",
-      invoiceTitle: vals.invoiceTitle,
-      invoiceDate: vals.invoiceDate,
-      companyId: vals.companyId,
-      partyId: vals.partyId,
-      companyName: selectedCompany?.name || vals.companyName || "",
-      companyAddress: selectedCompany?.address || vals.companyAddress || "",
-      companyGstin: selectedCompany?.gstin || vals.companyGstin || "",
-      companyStateName:
-        selectedCompany?.stateName || vals.companyStateName || "",
-      partyName: selectedParty?.name || vals.partyName || "",
-      partyAddress: selectedParty?.address || vals.partyAddress || "",
-      partyGstin: selectedParty?.gstin || vals.partyGstin || "",
-      partyStateName: selectedParty?.stateName || vals.partyStateName || "",
-      items: vals.items || watchedItems,
-      subtotal: subtotal,
-      gstEntries: vals.gstEntries || watchedGstEntries,
-      roundOff: Number(vals.roundOff ?? watchedRoundOff) || 0,
-      totalAmount: totalAmount,
+      invoiceNo: value?.invoiceNo ?? "",
+      invoiceTitle: value?.invoiceTitle ?? "",
+      invoiceDate: value.invoiceDate ?? "",
+      company: value?.company,
 
-      declaration: vals.declaration || "",
+      party: value.party,
+      items: value?.items ?? [],
+      subtotal: subtotal,
+      gstEntries: value.gstEntries,
+      roundOff: value.roundOff || 0,
+      totalAmount: totalAmount || 0,
+
+      declaration: value.declaration || "",
     };
   };
 
@@ -440,28 +447,32 @@ export const CreateInvoicePage: React.FC = () => {
         invoiceNo: pendingSaveData.invoiceNo.trim(),
         invoiceTitle: pendingSaveData.invoiceTitle,
         invoiceDate: pendingSaveData.invoiceDate,
-        companyId: pendingSaveData.companyId,
-        partyId: pendingSaveData.partyId,
-        companyName: pendingSaveData.companyName,
-        companyAddress: pendingSaveData.companyAddress,
-        companyGstin: pendingSaveData.companyGstin,
-        companyStateName: pendingSaveData.companyStateName,
-        partyName: pendingSaveData.partyName,
-        partyAddress: pendingSaveData.partyAddress,
-        partyGstin: pendingSaveData.partyGstin,
-        partyStateName: pendingSaveData.partyStateName,
-        items: pendingSaveData.items,
+        companyId: pendingSaveData.company?.id,
+        partyId: pendingSaveData.party?.id,
+        companyName: pendingSaveData.company?.name,
+        companyAddress: pendingSaveData.company?.address,
+        companyGstin: pendingSaveData.company?.gstin,
+        companyStateName: pendingSaveData.company?.stateName,
+        partyName: pendingSaveData.party?.name,
+        partyAddress: pendingSaveData.party?.address,
+        partyGstin: pendingSaveData.party?.gstin,
+        partyStateName: pendingSaveData.party?.stateName,
+        items: (pendingSaveData?.items || [])?.map((item) => ({
+          amount: item?.amount,
+          id: item?.id,
+          per: item?.per,
+          productName: item?.product?.name,
+          quantity: item?.quantity,
+          rate: item?.rate,
+          productId: item?.product?.id,
+        })),
         subtotal: subtotal,
         gstEntries: pendingSaveData.gstEntries,
         roundOff: Number(pendingSaveData.roundOff) || 0,
         totalAmount: totalAmount,
         declaration: pendingSaveData.declaration || "",
       });
-      showAlert({
-        title: "Invoice Created",
-        message: `Invoice #${pendingSaveData.invoiceNo} saved successfully!`,
-        variant: AlertVariant.SUCCESS,
-      });
+
       // Replace save button with print and download
       setModalMode(InvoiceModalMode.PREVIEW_WITH_PRINT);
     } catch (err: any) {
@@ -473,9 +484,6 @@ export const CreateInvoicePage: React.FC = () => {
       });
     }
   };
-
-  const selectedCompany = companies.find((c) => c.id === watchedCompanyId);
-  const selectedParty = parties.find((p) => p.id === watchedPartyId);
 
   return (
     <form onSubmit={handleSubmit(onFormValidForSave)} className="space-y-6">
@@ -591,7 +599,7 @@ export const CreateInvoicePage: React.FC = () => {
               <div className="space-y-2">
                 <Controller
                   control={control}
-                  name="companyId"
+                  name="company"
                   render={({ field, fieldState }) => (
                     <Field>
                       <div className="flex justify-between items-center">
@@ -611,10 +619,10 @@ export const CreateInvoicePage: React.FC = () => {
                       <FieldContent>
                         <Combobox
                           ref={field.ref}
-                          value={field.value}
+                          value={field.value?.id}
                           onChange={(val) => {
                             field.onChange(val);
-                            handleCompanyChange(String(val));
+                            handleCompanyChange(Number(val));
                           }}
                           options={companyOptions}
                           placeholder="Select company..."
@@ -630,15 +638,15 @@ export const CreateInvoicePage: React.FC = () => {
                   )}
                 />
 
-                {selectedCompany && (
+                {watchedSelectedCompany && (
                   <div className="p-2.5 rounded bg-muted/40 text-xs text-muted-foreground space-y-0.5 border">
                     <div className="font-semibold text-foreground">
-                      {selectedCompany.name}
+                      {watchedSelectedCompany?.name}
                     </div>
-                    <div>{selectedCompany.address}</div>
+                    <div>{watchedSelectedCompany?.address}</div>
                     <div>
-                      GSTIN: {selectedCompany.gstin} |{" "}
-                      {selectedCompany.stateName}
+                      GSTIN: {watchedSelectedCompany?.gstin} |{" "}
+                      {watchedSelectedCompany?.stateName}
                     </div>
                   </div>
                 )}
@@ -648,7 +656,7 @@ export const CreateInvoicePage: React.FC = () => {
               <div className="space-y-2">
                 <Controller
                   control={control}
-                  name="partyId"
+                  name="party"
                   render={({ field, fieldState }) => (
                     <Field>
                       <div className="flex justify-between items-center">
@@ -668,10 +676,10 @@ export const CreateInvoicePage: React.FC = () => {
                       <FieldContent>
                         <Combobox
                           ref={field.ref}
-                          value={field.value}
+                          value={field.value?.id}
                           onChange={(val) => {
                             field.onChange(val);
-                            handlePartyChange(String(val));
+                            handlePartyChange(Number(val));
                           }}
                           options={partyOptions}
                           placeholder="Select buyer party..."
@@ -687,14 +695,15 @@ export const CreateInvoicePage: React.FC = () => {
                   )}
                 />
 
-                {selectedParty && (
+                {watchedSelectedParty && (
                   <div className="p-2.5 rounded bg-muted/40 text-xs text-muted-foreground space-y-0.5 border">
                     <div className="font-semibold text-foreground">
-                      {selectedParty.name}
+                      {watchedSelectedParty?.name}
                     </div>
-                    <div>{selectedParty.address}</div>
+                    <div>{watchedSelectedParty?.address}</div>
                     <div>
-                      GSTIN: {selectedParty.gstin} | {selectedParty.stateName}
+                      GSTIN: {watchedSelectedParty?.gstin} |{" "}
+                      {watchedSelectedParty?.stateName}
                     </div>
                   </div>
                 )}
@@ -726,14 +735,13 @@ export const CreateInvoicePage: React.FC = () => {
                   size="sm"
                   onClick={() =>
                     appendItem({
-                      id: `item-${Date.now()}-${itemFields.length + 1}`,
-                      productId: NaN,
-                      productName: "",
+                      id: nanoid(5),
+
                       quantity: 1,
                       rate: 0,
                       per: QuantityUnit.SET,
                       amount: 0,
-                    })
+                    } as InvoiceItemFormSchemaType)
                   }
                   className="text-xs flex items-center gap-1"
                 >
@@ -769,16 +777,16 @@ export const CreateInvoicePage: React.FC = () => {
 
                         <Controller
                           control={control}
-                          name={`items.${index}.productId`}
+                          name={`items.${index}.product`}
                           render={({ field, fieldState }) => (
                             <Field>
                               <FieldContent>
                                 <Combobox
                                   ref={field.ref}
-                                  value={field.value}
+                                  value={field.value?.id}
                                   onChange={(val) => {
                                     field.onChange(val);
-                                    handleSelectProduct(index, String(val));
+                                    handleSelectProduct(index, Number(val));
                                   }}
                                   options={productOptions}
                                   placeholder="Pick a product..."
@@ -1004,7 +1012,8 @@ export const CreateInvoicePage: React.FC = () => {
                   <div className="rounded-md border border-border bg-white dark:bg-background divide-y divide-border/70 overflow-hidden">
                     {gstFields.length === 0 ? (
                       <div className="px-3 py-4 text-center text-xs text-muted-foreground">
-                        No GST entries applied. Click &quot;Add GST Row&quot; to add one.
+                        No GST entries applied. Click &quot;Add GST Row&quot; to
+                        add one.
                       </div>
                     ) : (
                       gstFields.map((field, index) => (
@@ -1043,7 +1052,9 @@ export const CreateInvoicePage: React.FC = () => {
                                     </Select>
 
                                     {fieldState?.invalid && (
-                                      <FieldError errors={[fieldState?.error]} />
+                                      <FieldError
+                                        errors={[fieldState?.error]}
+                                      />
                                     )}
                                   </FieldContent>
                                 </Field>
@@ -1067,7 +1078,9 @@ export const CreateInvoicePage: React.FC = () => {
 
                                         field?.onChange(rateNum);
                                         const newAmt = Number(
-                                          ((subtotal * rateNum) / 100).toFixed(2),
+                                          ((subtotal * rateNum) / 100).toFixed(
+                                            2,
+                                          ),
                                         );
                                         setValue(
                                           `gstEntries.${index}.amount`,
@@ -1091,7 +1104,9 @@ export const CreateInvoicePage: React.FC = () => {
                                     </Select>
 
                                     {fieldState?.invalid && (
-                                      <FieldError errors={[fieldState?.error]} />
+                                      <FieldError
+                                        errors={[fieldState?.error]}
+                                      />
                                     )}
                                   </FieldContent>
                                 </Field>
@@ -1244,11 +1259,13 @@ export const CreateInvoicePage: React.FC = () => {
         onSubmit={async (data) => {
           const created = await createCompanyMutation.mutateAsync(data);
           if (created && typeof created === "object" && "id" in created) {
-            setValue("companyId", created.id as number);
-            setValue("companyName", created.name);
-            setValue("companyAddress", created.address);
-            setValue("companyGstin", created.gstin);
-            setValue("companyStateName", created.stateName);
+            setValue("company", {
+              address: created?.address,
+              gstin: created?.gstin,
+              id: created?.id,
+              name: created?.name,
+              stateName: created?.stateName,
+            });
           }
         }}
       />
@@ -1259,11 +1276,13 @@ export const CreateInvoicePage: React.FC = () => {
         onSubmit={async (data) => {
           const created = await createPartyMutation.mutateAsync(data);
           if (created && typeof created === "object" && "id" in created) {
-            setValue("partyId", created.id as number);
-            setValue("partyName", created.name);
-            setValue("partyAddress", created.address);
-            setValue("partyGstin", created.gstin);
-            setValue("partyStateName", created.stateName);
+            setValue("party", {
+              address: created?.address,
+              gstin: created?.gstin,
+              id: created?.id,
+              name: created?.name,
+              stateName: created?.stateName,
+            });
           }
         }}
       />
@@ -1272,7 +1291,22 @@ export const CreateInvoicePage: React.FC = () => {
         isOpen={isProdDialogOpen}
         onClose={() => setIsProdDialogOpen(false)}
         onSubmit={async (data) => {
-          await createProductMutation.mutateAsync(data);
+          const created = await createProductMutation.mutateAsync(data);
+
+          setValue("items", [
+            ...(getValues("items") || []),
+            {
+              amount: 0,
+              id: nanoid(5),
+              per: QuantityUnit.SET,
+              product: {
+                id: created?.id,
+                name: created?.name,
+              },
+              quantity: 1,
+              rate: 0,
+            },
+          ]);
         }}
       />
     </form>

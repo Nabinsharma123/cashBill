@@ -1,54 +1,42 @@
+import { InvoiceTitle } from "@/constants/enums";
+import { formatDateDisplay, formatINR } from "@/lib/utils";
 import React from "react";
 import { TInvoiceSchema } from "../schema";
-import { InvoiceTitle } from "@/constants/enums";
-import { formatINR, formatDateDisplay } from "@/lib/utils";
 
-export interface InvoiceDocumentProps {
-  invoiceTitle?: string;
-  invoiceNo: string;
-  invoiceDate: string;
-  companyName: string;
-  companyAddress: string;
-  companyGstin: string;
-  companyState: string;
-  partyName: string;
-  partyAddress: string;
-  partyGstin: string;
-  partyState: string;
-  items: TInvoiceSchema["Item"][];
-  subtotal: number;
-  gstEntries: TInvoiceSchema["GstEntry"][];
-  roundOff: number;
-  totalAmount: number;
-  totalQuantity?: number;
-  declaration?: string;
-}
+export const InvoiceDocument: React.FC<{
+  invoice?: TInvoiceSchema["Preview"] | null;
+}> = ({ invoice }) => {
+  if (!invoice) return null;
 
-export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
-  invoiceTitle = InvoiceTitle.PROFORMA,
-  invoiceNo,
-  invoiceDate,
-  companyName,
-  companyAddress,
-  companyGstin,
-  companyState,
-  partyName,
-  partyAddress,
-  partyGstin,
-  partyState,
-  items,
-  subtotal,
-  gstEntries,
-  roundOff,
-  totalAmount,
-  totalQuantity,
-  declaration = "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
-}) => {
+  const invoiceTitle = invoice.invoiceTitle || InvoiceTitle.PROFORMA;
+  const invoiceNo = invoice.invoiceNo || "";
+  const invoiceDate = invoice.invoiceDate || "";
+
+  const companyName = invoice.company?.name || "";
+  const companyAddress = invoice.company?.address || "";
+  const companyGstin = invoice.company?.gstin || "";
+  const companyState = invoice.company?.stateName || "";
+
+  const partyName = invoice.party?.name || "";
+  const partyAddress = invoice.party?.address || "";
+  const partyGstin = invoice.party?.gstin || "";
+  const partyState = invoice.party?.stateName || "";
+
+  const items = invoice.items || [];
+  const gstEntries = invoice.gstEntries || [];
+  const subtotal = Number(invoice.subtotal) || 0;
+  const roundOff = Number(invoice.roundOff) || 0;
+  const totalAmount = Number(invoice.totalAmount) || 0;
+  const declaration =
+    invoice.declaration ||
+    "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.";
+
   const MIN_TABLE_ROWS = 8;
   const emptyRowCount = Math.max(0, MIN_TABLE_ROWS - items.length);
-  const computedTotalQuantity =
-    totalQuantity ??
-    items.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0);
+  const computedTotalQuantity = items.reduce(
+    (acc, it) => acc + (Number(it.quantity) || 0),
+    0,
+  );
 
   return (
     <div className="invoice-document-root bg-white text-black font-sans leading-tight text-[13px] w-full max-w-[800px] mx-auto p-4 select-none print:p-0 print:max-w-none">
@@ -73,12 +61,16 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
             </div>
             <div className="mt-2 text-[12.5px] space-y-0.5">
               <div>
-                <span className="font-semibold inline-block w-24">GSTIN/UIN</span>:{" "}
-                <span className="font-medium">{companyGstin}</span>
+                <span className="font-semibold inline-block w-24">
+                  GSTIN/UIN
+                </span>
+                : <span className="font-medium">{companyGstin}</span>
               </div>
               <div>
-                <span className="font-semibold inline-block w-24">State Name</span>:{" "}
-                <span className="font-medium">{companyState}</span>
+                <span className="font-semibold inline-block w-24">
+                  State Name
+                </span>
+                : <span className="font-medium">{companyState}</span>
               </div>
             </div>
           </div>
@@ -87,11 +79,17 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           <div className="w-[42%] flex flex-col justify-between">
             <div className="flex h-full">
               <div className="w-1/2 p-2.5 border-r border-black flex flex-col">
-                <div className="text-[11px] text-gray-600 font-medium">Invoice No.</div>
-                <div className="font-bold text-[13px] mt-1 text-black">{invoiceNo}</div>
+                <div className="text-[11px] text-gray-600 font-medium">
+                  Invoice No.
+                </div>
+                <div className="font-bold text-[13px] mt-1 text-black">
+                  {invoiceNo}
+                </div>
               </div>
               <div className="w-1/2 p-2.5 flex flex-col">
-                <div className="text-[11px] text-gray-600 font-medium">Dated</div>
+                <div className="text-[11px] text-gray-600 font-medium">
+                  Dated
+                </div>
                 <div className="font-semibold text-[13px] mt-1 text-black">
                   {formatDateDisplay(invoiceDate)}
                 </div>
@@ -102,7 +100,9 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
 
         {/* Buyer (Bill to) Section */}
         <div className="border-b border-black p-2.5 min-h-[90px]">
-          <div className="text-[11px] text-gray-700 font-medium">Buyer (Bill to)</div>
+          <div className="text-[11px] text-gray-700 font-medium">
+            Buyer (Bill to)
+          </div>
           <div className="font-bold text-[14px] uppercase text-black mt-0.5">
             {partyName || "BUYER NAME"}
           </div>
@@ -111,12 +111,14 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           </div>
           <div className="mt-2 text-[12.5px] flex flex-col gap-0.5">
             <div>
-              <span className="font-semibold inline-block w-24">GSTIN/UIN</span>:{" "}
-              <span className="font-medium">{partyGstin}</span>
+              <span className="font-semibold inline-block w-24">GSTIN/UIN</span>
+              : <span className="font-medium">{partyGstin}</span>
             </div>
             <div>
-              <span className="font-semibold inline-block w-24">State Name</span>:{" "}
-              <span className="font-medium">{partyState}</span>
+              <span className="font-semibold inline-block w-24">
+                State Name
+              </span>
+              : <span className="font-medium">{partyState}</span>
             </div>
           </div>
         </div>
@@ -127,7 +129,9 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
             <thead>
               <tr className="border-b border-black text-center font-semibold bg-gray-50/50">
                 <th className="border-r border-black py-1.5 px-1 w-[6%] font-semibold">
-                  Sl<br />No.
+                  Sl
+                  <br />
+                  No.
                 </th>
                 <th className="border-r border-black py-1.5 px-2 text-left w-[48%] font-semibold">
                   Description of Goods
@@ -153,7 +157,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                     {idx + 1}
                   </td>
                   <td className="border-r border-black py-1 px-2 font-bold text-left uppercase">
-                    {item.productName}
+                    {item.product?.name}
                   </td>
                   <td className="border-r border-black py-1 px-2 text-right font-medium">
                     {Number(item.quantity).toFixed(2)}
@@ -224,7 +228,9 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
                 <td className="border-r border-black"></td>
                 <td className="border-r border-black"></td>
                 <td className="py-0.5 px-2 text-right font-semibold">
-                  {Number(roundOff) >= 0 ? Number(roundOff).toFixed(2) : `(${Math.abs(Number(roundOff)).toFixed(2)})`}
+                  {Number(roundOff) >= 0
+                    ? Number(roundOff).toFixed(2)
+                    : `(${Math.abs(Number(roundOff)).toFixed(2)})`}
                 </td>
               </tr>
 

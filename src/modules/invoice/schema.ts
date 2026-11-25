@@ -6,8 +6,8 @@ export type TInvoiceSchema = {
     invoiceNo: string;
     invoiceTitle: string;
     invoiceDate: string;
-    companyId: number | null;
-    partyId: number | null;
+    companyId: number;
+    partyId: number;
     companyName: string;
     companyAddress: string;
     companyGstin: string;
@@ -25,9 +25,51 @@ export type TInvoiceSchema = {
     createdAt?: string;
   };
 
+  Preview: {
+    invoiceNo: string;
+    invoiceTitle: string;
+    invoiceDate: string;
+    subtotal: number;
+    totalAmount: number;
+    company: {
+      id: number;
+      name: string;
+      address: string;
+      gstin: string;
+      stateName: string;
+    };
+    party: {
+      id: number;
+      name: string;
+      address: string;
+      gstin: string;
+      stateName: string;
+    };
+    items: {
+      id: string;
+      product: {
+        id: number;
+        name: string;
+      };
+      quantity: number;
+      rate: number;
+      per: string;
+      amount: number;
+    }[];
+
+    gstEntries: {
+      type: GstType;
+      id: string;
+      rate: number;
+      amount: number;
+    }[];
+    roundOff: number;
+    declaration: string;
+  };
+
   Item: {
     id: string;
-    productId?: number | null;
+    productId: number;
     productName: string;
     quantity: number;
     rate: number;
