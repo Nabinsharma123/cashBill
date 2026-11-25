@@ -59,7 +59,7 @@ import {
   TAX_PRESET_OPTIONS,
   TaxPreset,
 } from "@/constants/enums";
-import { Building2, Eye, Package, Plus, Save, Trash2 } from "lucide-react";
+import { Building2, Eye, Package, Percent, Plus, Save, Trash2 } from "lucide-react";
 
 export const CreateInvoicePage: React.FC = () => {
   // TanStack Query Hooks
@@ -925,222 +925,49 @@ export const CreateInvoicePage: React.FC = () => {
 
         {/* 3. Tax & GST Section */}
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Percent className="h-4 w-4 text-primary" />
               Taxes & GST Controls
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* GST Preset Options */}
-
-            <Controller
-              control={control}
-              name="taxPreset"
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel required>GST Preset Options</FieldLabel>
-                  <FieldContent>
-                    <RadioGroup
-                      value={field?.value}
-                      onValueChange={(value) => {
-                        onGstPresetChange(value as TaxPreset);
-                      }}
-                      className="flex flex-col sm:flex-row gap-4 pt-1"
-                    >
-                      {TAX_PRESET_OPTIONS.map((opt) => (
-                        <div
-                          key={opt.value}
-                          className="flex items-center space-x-2"
-                        >
-                          <RadioGroupItem
-                            value={opt.value}
-                            id={`preset-${opt.value}`}
-                          />
-                          <Label
-                            htmlFor={`preset-${opt.value}`}
-                            className="cursor-pointer font-medium"
-                          >
-                            {opt.label}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                    {fieldState?.invalid && (
-                      <FieldError errors={[fieldState?.error]} />
-                    )}
-                  </FieldContent>
-                </Field>
-              )}
-            />
-
-            {/* GST Entries */}
-            <div className="space-y-2 border-t pt-3">
-              <div className="flex justify-between items-center">
-                <Label className="text-xs font-semibold">
-                  GST Entries ({gstFields.length})
-                </Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setValue("taxPreset", TaxPreset.CUSTOM);
-                    appendGst({
-                      id: nanoid(5),
-                      type: GstType.GST,
-                      rate: GstRate.RATE_18,
-                      amount: Number(((subtotal * 18) / 100).toFixed(2)),
-                    });
-                  }}
-                  className="text-xs flex items-center gap-1 h-7"
-                >
-                  <Plus className="h-3 w-3" /> Add GST Row
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {gstFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="flex items-center gap-2 p-2 rounded border bg-card text-xs"
-                  >
-                    {/* GST dropdown */}
-                    <div className="w-[120px]">
-                      <Controller
-                        control={control}
-                        name={`gstEntries.${index}.type`}
-                        render={({ field, fieldState }) => (
-                          <Field>
-                            <FieldContent>
-                              <Select
-                                value={String(field?.value)}
-                                onValueChange={(val) => {
-                                  setValue("taxPreset", TaxPreset.CUSTOM);
-
-                                  field.onChange(val);
-                                }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {GST_TYPE_OPTIONS.map((opt) => (
-                                    <SelectItem
-                                      key={opt.value}
-                                      value={opt.value}
-                                    >
-                                      {opt.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-
-                              {fieldState?.invalid && (
-                                <FieldError errors={[fieldState?.error]} />
-                              )}
-                            </FieldContent>
-                          </Field>
-                        )}
-                      />
-                    </div>
-
-                    {/* Rate dropdown */}
-                    <div className="w-[110px]">
-                      <Controller
-                        control={control}
-                        name={`gstEntries.${index}.rate`}
-                        render={({ field, fieldState }) => (
-                          <Field>
-                            <FieldContent>
-                              <Select
-                                value={String(field?.value)}
-                                onValueChange={(val) => {
-                                  setValue("taxPreset", TaxPreset.CUSTOM);
-                                  const rateNum = Number(val) as GstRate;
-
-                                  field?.onChange(rateNum);
-                                  const newAmt = Number(
-                                    ((subtotal * rateNum) / 100).toFixed(2),
-                                  );
-                                  setValue(
-                                    `gstEntries.${index}.amount`,
-                                    newAmt,
-                                  );
-                                }}
-                              >
-                                <SelectTrigger className="h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {GST_RATE_OPTIONS.map((opt) => (
-                                    <SelectItem
-                                      key={opt.value}
-                                      value={String(opt.value)}
-                                    >
-                                      {opt.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-
-                              {fieldState?.invalid && (
-                                <FieldError errors={[fieldState?.error]} />
-                              )}
-                            </FieldContent>
-                          </Field>
-                        )}
-                      />
-                    </div>
-
-                    {/* Calculated amount */}
-                    <div className="flex-1 text-right font-mono font-semibold pr-2">
-                      ₹{" "}
-                      {(Number(watchedGstEntries[index]?.amount) || 0).toFixed(
-                        2,
-                      )}
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setValue("taxPreset", TaxPreset.CUSTOM);
-                        removeGst(index);
-                      }}
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Round Off */}
-            <div className="border-t pt-3 max-w-xs">
-              <div className="space-y-1.5">
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Tax Controls */}
+              <div className="lg:col-span-7 space-y-5">
+                {/* GST Preset Options */}
                 <Controller
                   control={control}
-                  name="roundOff"
+                  name="taxPreset"
                   render={({ field, fieldState }) => (
                     <Field>
-                      <div className="flex justify-between items-center">
-                        <FieldLabel>Round Off (₹)</FieldLabel>
-
-                        <button
-                          type="button"
-                          onClick={applyAutoRoundOff}
-                          className="text-[11px] text-primary hover:underline"
-                        >
-                          Auto-Round
-                        </button>
-                      </div>
+                      <FieldLabel required>GST Preset Options</FieldLabel>
                       <FieldContent>
-                        <NumberField
-                          {...field}
-                          onFocus={(e) => e.target.select()}
-                        />
+                        <RadioGroup
+                          value={field?.value}
+                          onValueChange={(value) => {
+                            onGstPresetChange(value as TaxPreset);
+                          }}
+                          className="flex flex-wrap gap-x-5 gap-y-2 pt-1"
+                        >
+                          {TAX_PRESET_OPTIONS.map((opt) => (
+                            <div
+                              key={opt.value}
+                              className="flex items-center space-x-2"
+                            >
+                              <RadioGroupItem
+                                value={opt.value}
+                                id={`preset-${opt.value}`}
+                              />
+                              <Label
+                                htmlFor={`preset-${opt.value}`}
+                                className="cursor-pointer font-medium text-sm"
+                              >
+                                {opt.label}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
                         {fieldState?.invalid && (
                           <FieldError errors={[fieldState?.error]} />
                         )}
@@ -1148,33 +975,224 @@ export const CreateInvoicePage: React.FC = () => {
                     </Field>
                   )}
                 />
-              </div>
-            </div>
 
-            {/* Summary Box */}
-            <div className="rounded-lg bg-muted/40 p-4 border space-y-1.5 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Subtotal:</span>
-                <span className="font-mono">₹ {subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Total GST:</span>
-                <span className="font-mono">+ ₹ {totalGst.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Round Off:</span>
-                <span className="font-mono">
-                  {watchedRoundOff >= 0
-                    ? `+ ₹ ${watchedRoundOff.toFixed(2)}`
-                    : `- ₹ ${Math.abs(watchedRoundOff).toFixed(2)}`}
-                </span>
+                {/* GST Entries */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs font-semibold text-foreground">
+                      GST Entries ({gstFields.length})
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setValue("taxPreset", TaxPreset.CUSTOM);
+                        appendGst({
+                          id: nanoid(5),
+                          type: GstType.GST,
+                          rate: GstRate.RATE_18,
+                          amount: Number(((subtotal * 18) / 100).toFixed(2)),
+                        });
+                      }}
+                      className="text-xs flex items-center gap-1 h-7 px-2.5"
+                    >
+                      <Plus className="h-3 w-3" /> Add GST Row
+                    </Button>
+                  </div>
+
+                  <div className="rounded-md border border-border bg-white dark:bg-background divide-y divide-border/70 overflow-hidden">
+                    {gstFields.length === 0 ? (
+                      <div className="px-3 py-4 text-center text-xs text-muted-foreground">
+                        No GST entries applied. Click &quot;Add GST Row&quot; to add one.
+                      </div>
+                    ) : (
+                      gstFields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs"
+                        >
+                          {/* GST dropdown */}
+                          <div className="w-[115px]">
+                            <Controller
+                              control={control}
+                              name={`gstEntries.${index}.type`}
+                              render={({ field, fieldState }) => (
+                                <Field>
+                                  <FieldContent>
+                                    <Select
+                                      value={String(field?.value)}
+                                      onValueChange={(val) => {
+                                        setValue("taxPreset", TaxPreset.CUSTOM);
+                                        field.onChange(val);
+                                      }}
+                                    >
+                                      <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {GST_TYPE_OPTIONS.map((opt) => (
+                                          <SelectItem
+                                            key={opt.value}
+                                            value={opt.value}
+                                          >
+                                            {opt.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+
+                                    {fieldState?.invalid && (
+                                      <FieldError errors={[fieldState?.error]} />
+                                    )}
+                                  </FieldContent>
+                                </Field>
+                              )}
+                            />
+                          </div>
+
+                          {/* Rate dropdown */}
+                          <div className="w-[100px]">
+                            <Controller
+                              control={control}
+                              name={`gstEntries.${index}.rate`}
+                              render={({ field, fieldState }) => (
+                                <Field>
+                                  <FieldContent>
+                                    <Select
+                                      value={String(field?.value)}
+                                      onValueChange={(val) => {
+                                        setValue("taxPreset", TaxPreset.CUSTOM);
+                                        const rateNum = Number(val) as GstRate;
+
+                                        field?.onChange(rateNum);
+                                        const newAmt = Number(
+                                          ((subtotal * rateNum) / 100).toFixed(2),
+                                        );
+                                        setValue(
+                                          `gstEntries.${index}.amount`,
+                                          newAmt,
+                                        );
+                                      }}
+                                    >
+                                      <SelectTrigger className="h-8 text-xs">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {GST_RATE_OPTIONS.map((opt) => (
+                                          <SelectItem
+                                            key={opt.value}
+                                            value={String(opt.value)}
+                                          >
+                                            {opt.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+
+                                    {fieldState?.invalid && (
+                                      <FieldError errors={[fieldState?.error]} />
+                                    )}
+                                  </FieldContent>
+                                </Field>
+                              )}
+                            />
+                          </div>
+
+                          {/* Calculated amount */}
+                          <div className="flex-1 text-right font-mono font-semibold tabular-nums pr-1">
+                            ₹{" "}
+                            {(
+                              Number(watchedGstEntries[index]?.amount) || 0
+                            ).toFixed(2)}
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setValue("taxPreset", TaxPreset.CUSTOM);
+                              removeGst(index);
+                            }}
+                            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Round Off */}
+                <div className="max-w-[220px]">
+                  <Controller
+                    control={control}
+                    name="roundOff"
+                    render={({ field, fieldState }) => (
+                      <Field>
+                        <div className="flex justify-between items-center">
+                          <FieldLabel>Round Off (₹)</FieldLabel>
+
+                          <button
+                            type="button"
+                            onClick={applyAutoRoundOff}
+                            className="text-xs font-medium text-primary hover:underline"
+                          >
+                            Auto-Round
+                          </button>
+                        </div>
+                        <FieldContent>
+                          <NumberField
+                            {...field}
+                            onFocus={(e) => e.target.select()}
+                          />
+                          {fieldState?.invalid && (
+                            <FieldError errors={[fieldState?.error]} />
+                          )}
+                        </FieldContent>
+                      </Field>
+                    )}
+                  />
+                </div>
               </div>
 
-              <div className="border-t pt-2 mt-2 flex justify-between font-bold text-base text-foreground">
-                <span>Grand Total:</span>
-                <span className="font-mono text-primary text-xl">
-                  ₹ {totalAmount.toFixed(2)}
-                </span>
+              {/* Right Column: Summary Panel */}
+              <div className="lg:col-span-5">
+                <div className="rounded-md border border-border bg-muted/40 p-4 space-y-2.5 text-sm">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+                    Calculation Summary
+                  </div>
+
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span className="font-mono tabular-nums text-foreground">
+                      ₹ {subtotal.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Total GST</span>
+                    <span className="font-mono tabular-nums text-foreground">
+                      + ₹ {totalGst.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Round Off</span>
+                    <span className="font-mono tabular-nums text-foreground">
+                      {watchedRoundOff >= 0
+                        ? `+ ₹ ${watchedRoundOff.toFixed(2)}`
+                        : `- ₹ ${Math.abs(watchedRoundOff).toFixed(2)}`}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-border/80 pt-3 mt-1 flex justify-between items-baseline font-bold text-base text-foreground">
+                    <span>Grand Total</span>
+                    <span className="font-mono tabular-nums text-primary text-xl">
+                      ₹ {totalAmount.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
