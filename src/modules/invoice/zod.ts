@@ -13,9 +13,7 @@ export const invoiceItemFormSchema = z.object({
       message: "Product is required",
     },
   ),
-  quantity: numberSchema("Quantity").positive(
-    "Quantity must be greater than 0",
-  ),
+  quantity: numberSchema("Quantity").positive("Must be >0"),
   rate: numberSchema("Rate", 0),
   per: z.nativeEnum(QuantityUnit),
   amount: numberSchema("Amount", 0),

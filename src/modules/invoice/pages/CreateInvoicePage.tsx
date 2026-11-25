@@ -107,9 +107,10 @@ export const CreateInvoicePage: React.FC = () => {
     watch,
     setValue,
     getValues,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<InvoiceFormSchemaType>({
     resolver: zodResolver(invoiceFormSchema),
+    mode: "onChange",
     defaultValues: {
       invoiceNo: "",
       invoiceTitle: InvoiceTitle.PROFORMA,
@@ -127,6 +128,7 @@ export const CreateInvoicePage: React.FC = () => {
       taxPreset: TaxPreset.IGST_18,
       gstEntries: [
         {
+          id: nanoid(5),
           type: GstType.IGST,
           rate: GstRate.RATE_18,
           amount: 0,
@@ -158,6 +160,9 @@ export const CreateInvoicePage: React.FC = () => {
 
   // Watch form fields for live preview and reactive computations
   const formValues = watch();
+
+  console.log(formValues);
+  console.log(errors);
 
   const companyOptions: ComboboxOption[] = useMemo(
     () =>
@@ -369,7 +374,7 @@ export const CreateInvoicePage: React.FC = () => {
     try {
       const filename =
         defaultFilename ||
-        `Invoice_${formValues.invoiceNo.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
+        `Invoice_${getValues("invoiceNo").replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
       if (window.electronAPI?.exportPdf) {
         const res = await window.electronAPI.exportPdf(filename);
         if (res.success) {
@@ -564,7 +569,11 @@ export const CreateInvoicePage: React.FC = () => {
                   <Field>
                     <FieldLabel required>Invoice No.</FieldLabel>
                     <FieldContent>
-                      <Input {...field} placeholder="e.g. BI/2024/25/001" />
+                      <Input
+                        onFocus={(e) => e.target.select()}
+                        {...field}
+                        placeholder="e.g. BI/2024/25/001"
+                      />
                       {fieldState?.invalid && (
                         <FieldError errors={[fieldState?.error]} />
                       )}
@@ -812,12 +821,13 @@ export const CreateInvoicePage: React.FC = () => {
                               <FieldContent>
                                 <NumberField
                                   {...field}
+                                  step={1}
                                   onFocus={(e) => e.target.select()}
-                                  onChange={(e) => {
+                                  onValueChange={(value) => {
                                     handleItemNumberChange(
                                       index,
                                       "quantity",
-                                      Number(e.target.value),
+                                      value,
                                     );
                                   }}
                                 />
@@ -838,12 +848,13 @@ export const CreateInvoicePage: React.FC = () => {
                               <FieldContent>
                                 <NumberField
                                   {...field}
+                                  step={1}
                                   onFocus={(e) => e.target.select()}
-                                  onChange={(e) => {
+                                  onValueChange={(value) => {
                                     handleItemNumberChange(
                                       index,
                                       "rate",
-                                      Number(e.target.value),
+                                      value,
                                     );
                                   }}
                                 />
@@ -1160,7 +1171,11 @@ export const CreateInvoicePage: React.FC = () => {
                         </div>
                         <FieldContent>
                           <NumberField
+                            allowNegative
                             {...field}
+                            onValueChange={(value) => {
+                              field?.onChange(value);
+                            }}
                             onFocus={(e) => e.target.select()}
                           />
                           {fieldState?.invalid && (
