@@ -6,7 +6,6 @@ export type TPartySchema = {
     gstin: string;
     stateName: string;
     createdAt?: string;
-    updatedAt?: string;
   };
 
   CreatePayload: {

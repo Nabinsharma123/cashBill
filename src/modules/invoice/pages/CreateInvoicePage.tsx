@@ -104,10 +104,10 @@ export const CreateInvoicePage: React.FC = () => {
   const {
     control,
     handleSubmit,
-    watch,
+
     setValue,
     getValues,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = useForm<InvoiceFormSchemaType>({
     resolver: zodResolver(invoiceFormSchema),
 
@@ -157,12 +157,6 @@ export const CreateInvoicePage: React.FC = () => {
     control,
     name: "gstEntries",
   });
-
-  // Watch form fields for live preview and reactive computations
-  const formValues = watch();
-
-  console.log(formValues);
-  console.log(errors);
 
   const companyOptions: ComboboxOption[] = useMemo(
     () =>

@@ -1,8 +1,14 @@
 import { ipcMain, dialog, BrowserWindow } from "electron";
 import { getDrizzleDb } from "./database";
 import * as schema from "./db/schema";
-import { count, desc, eq, like, or } from "drizzle-orm";
-import fs from "fs";
+import { count, desc, eq, or, sql } from "drizzle-orm";
+import fs from "node:fs";
+import path from "node:path";
+
+function toFiniteNumber(value: unknown, fallback = 0): number {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
 
 export function registerIpcHandlers() {
   const db = getDrizzleDb();
@@ -12,29 +18,32 @@ export function registerIpcHandlers() {
     return db.select().from(schema.companies).orderBy(desc(schema.companies.id)).all();
   });
 
-  ipcMain.handle("companies:create", (_, data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => {
-    const stateName = data.stateName || data.state_name || "";
+  ipcMain.handle("companies:create", (_, data: { name: string; address: string; gstin: string; stateName: string }) => {
     return db.insert(schema.companies).values({
       name: data.name,
       address: data.address,
       gstin: data.gstin,
-      stateName,
+      stateName: data.stateName,
     }).returning().get();
   });
 
-  ipcMain.handle("companies:update", (_, id: number, data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => {
-    const stateName = data.stateName || data.state_name || "";
-    return db.update(schema.companies).set({
+  ipcMain.handle("companies:update", (_, id: number, data: { name: string; address: string; gstin: string; stateName: string }) => {
+    const updated = db.update(schema.companies).set({
       name: data.name,
       address: data.address,
       gstin: data.gstin,
-      stateName,
+      stateName: data.stateName,
     }).where(eq(schema.companies.id, id)).returning().get();
+
+    if (!updated) {
+      throw new Error("Company not found");
+    }
+    return updated;
   });
 
   ipcMain.handle("companies:delete", (_, id: number) => {
-    db.delete(schema.companies).where(eq(schema.companies.id, id)).run();
-    return { success: true };
+    const result = db.delete(schema.companies).where(eq(schema.companies.id, id)).run();
+    return { success: result.changes > 0 };
   });
 
   // ==================== PARTIES ====================
@@ -42,29 +51,32 @@ export function registerIpcHandlers() {
     return db.select().from(schema.parties).orderBy(desc(schema.parties.id)).all();
   });
 
-  ipcMain.handle("parties:create", (_, data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => {
-    const stateName = data.stateName || data.state_name || "";
+  ipcMain.handle("parties:create", (_, data: { name: string; address: string; gstin: string; stateName: string }) => {
     return db.insert(schema.parties).values({
       name: data.name,
       address: data.address,
       gstin: data.gstin,
-      stateName,
+      stateName: data.stateName,
     }).returning().get();
   });
 
-  ipcMain.handle("parties:update", (_, id: number, data: { name: string; address: string; gstin: string; stateName?: string; state_name?: string }) => {
-    const stateName = data.stateName || data.state_name || "";
-    return db.update(schema.parties).set({
+  ipcMain.handle("parties:update", (_, id: number, data: { name: string; address: string; gstin: string; stateName: string }) => {
+    const updated = db.update(schema.parties).set({
       name: data.name,
       address: data.address,
       gstin: data.gstin,
-      stateName,
+      stateName: data.stateName,
     }).where(eq(schema.parties.id, id)).returning().get();
+
+    if (!updated) {
+      throw new Error("Party not found");
+    }
+    return updated;
   });
 
   ipcMain.handle("parties:delete", (_, id: number) => {
-    db.delete(schema.parties).where(eq(schema.parties.id, id)).run();
-    return { success: true };
+    const result = db.delete(schema.parties).where(eq(schema.parties.id, id)).run();
+    return { success: result.changes > 0 };
   });
 
   // ==================== PRODUCTS ====================
@@ -79,31 +91,36 @@ export function registerIpcHandlers() {
   });
 
   ipcMain.handle("products:update", (_, id: number, data: { name: string }) => {
-    return db.update(schema.products).set({
+    const updated = db.update(schema.products).set({
       name: data.name,
     }).where(eq(schema.products.id, id)).returning().get();
+
+    if (!updated) {
+      throw new Error("Product not found");
+    }
+    return updated;
   });
 
   ipcMain.handle("products:delete", (_, id: number) => {
-    db.delete(schema.products).where(eq(schema.products.id, id)).run();
-    return { success: true };
+    const result = db.delete(schema.products).where(eq(schema.products.id, id)).run();
+    return { success: result.changes > 0 };
   });
 
   // ==================== INVOICES ====================
   ipcMain.handle("invoices:getAll", (_, params?: { page?: number; limit?: number; search?: string }) => {
-    const page = Math.max(1, Number(params?.page) || 1);
-    const limit = Math.max(1, Number(params?.limit) || 10);
-    const offset = (page - 1) * limit;
+    const requestedPage = Math.max(1, Math.floor(Number(params?.page) || 1));
+    const limit = Math.max(1, Math.floor(Number(params?.limit) || 10));
     const search = params?.search?.trim();
 
     let conditions = undefined;
     if (search) {
-      const searchPattern = `%${search}%`;
+      const escapedSearch = search.replace(/[\\%_]/g, "\\$&");
+      const searchPattern = `%${escapedSearch}%`;
       conditions = or(
-        like(schema.invoices.invoiceNo, searchPattern),
-        like(schema.invoices.partyName, searchPattern),
-        like(schema.invoices.companyName, searchPattern),
-        like(schema.invoices.invoiceDate, searchPattern)
+        sql`${schema.invoices.invoiceNo} LIKE ${searchPattern} ESCAPE '\\'`,
+        sql`${schema.invoices.partyName} LIKE ${searchPattern} ESCAPE '\\'`,
+        sql`${schema.invoices.companyName} LIKE ${searchPattern} ESCAPE '\\'`,
+        sql`${schema.invoices.invoiceDate} LIKE ${searchPattern} ESCAPE '\\'`,
       );
     }
 
@@ -116,6 +133,9 @@ export function registerIpcHandlers() {
 
     const [countResult] = conditions ? countQuery.where(conditions).all() : countQuery.all();
     const total = countResult?.total || 0;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const page = Math.min(requestedPage, totalPages);
+    const offset = (page - 1) * limit;
 
     // Fetch page records
     const itemsQuery = db
@@ -132,7 +152,7 @@ export function registerIpcHandlers() {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages,
     };
   });
 
@@ -140,49 +160,40 @@ export function registerIpcHandlers() {
     return db.select().from(schema.invoices).where(eq(schema.invoices.id, id)).get() || null;
   });
 
-  ipcMain.handle("invoices:create", (_, invoice: any) => {
-    let itemsArr = invoice.items;
-    if (typeof itemsArr === "string") {
-      try { itemsArr = JSON.parse(itemsArr); } catch { itemsArr = []; }
-    } else if (!itemsArr && invoice.items_json) {
-      try { itemsArr = JSON.parse(invoice.items_json); } catch { itemsArr = []; }
+  ipcMain.handle("invoices:create", (_, invoice: schema.InsertInvoice) => {
+    try {
+      return db.insert(schema.invoices).values({
+        invoiceNo: invoice.invoiceNo,
+        invoiceTitle: invoice.invoiceTitle,
+        invoiceDate: invoice.invoiceDate,
+        companyId: invoice.companyId ?? null,
+        partyId: invoice.partyId ?? null,
+        companyName: invoice.companyName,
+        companyAddress: invoice.companyAddress,
+        companyGstin: invoice.companyGstin,
+        companyStateName: invoice.companyStateName,
+        partyName: invoice.partyName,
+        partyAddress: invoice.partyAddress,
+        partyGstin: invoice.partyGstin,
+        partyStateName: invoice.partyStateName,
+        items: Array.isArray(invoice.items) ? invoice.items : [],
+        subtotal: toFiniteNumber(invoice.subtotal),
+        gstEntries: Array.isArray(invoice.gstEntries) ? invoice.gstEntries : [],
+        roundOff: toFiniteNumber(invoice.roundOff),
+        totalAmount: toFiniteNumber(invoice.totalAmount),
+        declaration: invoice.declaration ?? "",
+      }).returning().get();
+    } catch (err: any) {
+      if (err?.code === "SQLITE_CONSTRAINT_UNIQUE") {
+        throw new Error(`Invoice number "${invoice.invoiceNo}" already exists.`);
+      }
+      throw err;
     }
-
-    let gstEntriesArr = invoice.gstEntries;
-    if (typeof gstEntriesArr === "string") {
-      try { gstEntriesArr = JSON.parse(gstEntriesArr); } catch { gstEntriesArr = []; }
-    } else if (!gstEntriesArr && invoice.gst_entries_json) {
-      try { gstEntriesArr = JSON.parse(invoice.gst_entries_json); } catch { gstEntriesArr = []; }
-    }
-
-    const newInvoice = db.insert(schema.invoices).values({
-      invoiceNo: invoice.invoiceNo || invoice.invoice_no,
-      invoiceTitle: invoice.invoiceTitle || invoice.invoice_title || "PROFORMA INVOICE",
-      invoiceDate: invoice.invoiceDate || invoice.invoice_date,
-      companyId: invoice.companyId ?? invoice.company_id ?? null,
-      partyId: invoice.partyId ?? invoice.party_id ?? null,
-      companyName: invoice.companyName || invoice.company_name,
-      companyAddress: invoice.companyAddress || invoice.company_address,
-      companyGstin: invoice.companyGstin || invoice.company_gstin,
-      companyStateName: invoice.companyStateName || invoice.company_state_name,
-      partyName: invoice.partyName || invoice.party_name,
-      partyAddress: invoice.partyAddress || invoice.party_address,
-      partyGstin: invoice.partyGstin || invoice.party_gstin,
-      partyStateName: invoice.partyStateName || invoice.party_state_name,
-      items: itemsArr || [],
-      subtotal: Number(invoice.subtotal) || 0,
-      gstEntries: gstEntriesArr || [],
-      roundOff: Number(invoice.roundOff ?? invoice.round_off) || 0,
-      totalAmount: Number(invoice.totalAmount ?? invoice.total_amount) || 0,
-      declaration: invoice.declaration || "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
-    }).returning().get();
-
-    return newInvoice;
   });
 
   ipcMain.handle("invoices:delete", (_, id: number) => {
-    db.delete(schema.invoices).where(eq(schema.invoices.id, id)).run();
-    return { success: true };
+    const result = db.delete(schema.invoices).where(eq(schema.invoices.id, id)).run();
+    return { success: result.changes > 0 };
   });
 
   // ==================== PDF & PRINT ====================
@@ -190,9 +201,13 @@ export function registerIpcHandlers() {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) return { success: false, error: "Window not found" };
 
+    const safeFilename =
+      path.basename(defaultFilename || "Invoice.pdf").replace(/[<>:"/\\|?*]/g, "_") ||
+      "Invoice.pdf";
+
     const { filePath, canceled } = await dialog.showSaveDialog(win, {
       title: "Save Invoice as PDF",
-      defaultPath: defaultFilename || "Invoice.pdf",
+      defaultPath: safeFilename,
       filters: [{ name: "PDF Files", extensions: ["pdf"] }],
     });
 
@@ -213,24 +228,33 @@ export function registerIpcHandlers() {
         },
       });
 
-      fs.writeFileSync(filePath, pdfData);
+      await fs.promises.writeFile(filePath, pdfData);
       return { success: true, filePath };
     } catch (err: any) {
       console.error("PDF generation failed:", err);
-      return { success: false, error: err.message };
+      return { success: false, error: err?.message || String(err) };
     }
   });
 
-  ipcMain.handle("invoices:print", async (event) => {
-    try {
-      event.sender.print({
-        silent: false,
-        printBackground: true,
-      });
-      return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+  ipcMain.handle("invoices:print", (event) => {
+    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+      event.sender.print(
+        {
+          silent: false,
+          printBackground: true,
+        },
+        (success, failureReason) => {
+          if (success) {
+            resolve({ success: true });
+          } else {
+            resolve({
+              success: false,
+              error: failureReason || "Print canceled or failed",
+            });
+          }
+        },
+      );
+    });
   });
 
   // ==================== WINDOW CONTROLS ====================

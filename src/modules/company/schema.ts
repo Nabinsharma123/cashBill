@@ -6,7 +6,6 @@ export type TCompanySchema = {
     gstin: string;
     stateName: string;
     createdAt?: string;
-    updatedAt?: string;
   };
 
   CreatePayload: {

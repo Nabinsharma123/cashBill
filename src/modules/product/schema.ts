@@ -3,7 +3,6 @@ export type TProductSchema = {
     id: number;
     name: string;
     createdAt?: string;
-    updatedAt?: string;
   };
 
   CreatePayload: {

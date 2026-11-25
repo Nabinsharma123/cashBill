@@ -9,7 +9,6 @@ export const companies = sqliteTable("companies", {
   gstin: text("gstin").notNull(),
   stateName: text("state_name").notNull(),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type CompanyDoc = typeof companies.$inferSelect;
@@ -23,7 +22,6 @@ export const parties = sqliteTable("parties", {
   gstin: text("gstin").notNull(),
   stateName: text("state_name").notNull(),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type PartyDoc = typeof parties.$inferSelect;
@@ -34,7 +32,6 @@ export const products = sqliteTable("products", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type ProductDoc = typeof products.$inferSelect;

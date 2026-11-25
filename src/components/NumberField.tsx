@@ -1,40 +1,43 @@
-import { InputHTMLAttributes } from "react";
+import { forwardRef, InputHTMLAttributes } from "react";
 import { Input } from "./ui/input";
 
-const NumberField = ({
-  onChange,
-  allowNegative = false,
-  onValueChange,
-  value,
-  ...props
-}: InputHTMLAttributes<HTMLInputElement> & {
+export interface NumberFieldProps
+  extends InputHTMLAttributes<HTMLInputElement> {
   value: number;
   allowNegative?: boolean;
   onValueChange: (value: number) => void;
-}) => {
-  return (
-    <Input
-      type="number"
-      inputMode="numeric"
-      onWheel={(e) => e.currentTarget.blur()}
-      onKeyDown={(evt) =>
-        ["e", "E", "+", ...(!allowNegative ? ["-"] : [])].includes(evt.key) &&
-        evt.preventDefault()
-      }
-      onChange={(e) => {
-        if (
-          (!allowNegative && e.target.valueAsNumber < 0) ||
-          isNaN(e.target.valueAsNumber)
-        ) {
-          onValueChange(0);
-        } else {
-          onValueChange?.(e.target.valueAsNumber);
+}
+
+const NumberField = forwardRef<HTMLInputElement, NumberFieldProps>(
+  ({ onChange, allowNegative = false, onValueChange, value, ...props }, ref) => {
+    return (
+      <Input
+        ref={ref}
+        type="number"
+        inputMode="numeric"
+        onWheel={(e) => e.currentTarget.blur()}
+        onKeyDown={(evt) =>
+          ["e", "E", "+", ...(!allowNegative ? ["-"] : [])].includes(evt.key) &&
+          evt.preventDefault()
         }
-      }}
-      value={value}
-      {...props}
-    />
-  );
-};
+        onChange={(e) => {
+          onChange?.(e);
+          if (
+            (!allowNegative && e.target.valueAsNumber < 0) ||
+            isNaN(e.target.valueAsNumber)
+          ) {
+            onValueChange(0);
+          } else {
+            onValueChange?.(e.target.valueAsNumber);
+          }
+        }}
+        value={value}
+        {...props}
+      />
+    );
+  },
+);
+
+NumberField.displayName = "NumberField";
 
 export default NumberField;
