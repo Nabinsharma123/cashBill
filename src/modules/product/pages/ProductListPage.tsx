@@ -1,5 +1,4 @@
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,10 +36,8 @@ export const ProductListPage: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { showConfirm, showAlert } = useAlert();
 
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.tags && p.tags.toLowerCase().includes(searchTerm.toLowerCase())),
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleDelete = (id: number) => {
@@ -88,7 +85,7 @@ export const ProductListPage: React.FC = () => {
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, tags..."
+                placeholder="Search by product name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -119,7 +116,6 @@ export const ProductListPage: React.FC = () => {
                 <TableRow>
                   <TableHead className="w-[60px]">No.</TableHead>
                   <TableHead>Product Name</TableHead>
-                  <TableHead>Tags</TableHead>
                   <TableHead className="text-right w-[110px]">
                     Actions
                   </TableHead>
@@ -133,25 +129,6 @@ export const ProductListPage: React.FC = () => {
                     </TableCell>
                     <TableCell className="font-semibold text-foreground">
                       {p.name}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {p.tags ? (
-                          p.tags.split(",").map((t, idx) => (
-                            <Badge
-                              key={idx}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {t.trim()}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-muted-foreground text-xs italic">
-                            No tags
-                          </span>
-                        )}
-                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">

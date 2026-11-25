@@ -74,7 +74,6 @@ function initTables(drizzleDb: BetterSQLite3Database<typeof schema>) {
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      tags TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -109,19 +108,6 @@ function initTables(drizzleDb: BetterSQLite3Database<typeof schema>) {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
-
-  // Migration: Drop total_quantity_unit column if it exists in legacy databases
-  try {
-    const cols = (drizzleDb as any).session.client.pragma("table_info(invoices)") as { name: string }[];
-    if (cols.some((c) => c.name === "total_quantity_unit")) {
-      (drizzleDb as any).session.client.prepare("ALTER TABLE invoices DROP COLUMN total_quantity_unit").run();
-    }
-    if (cols.some((c) => c.name === "total_quantity")) {
-      (drizzleDb as any).session.client.prepare("ALTER TABLE invoices DROP COLUMN total_quantity").run();
-    }
-  } catch (_e) {
-    // Ignore if table does not exist or column already dropped
-  }
 }
 
 function seedInitialData(drizzleDb: BetterSQLite3Database<typeof schema>) {
@@ -173,19 +159,15 @@ function seedInitialData(drizzleDb: BetterSQLite3Database<typeof schema>) {
       .values([
         {
           name: '8" BED JOINTER(SHREYA)',
-          tags: "jointer, hardware, shreya",
         },
         {
           name: '10"(M) BED JOINTER (SHREYA)',
-          tags: "jointer, hardware, shreya",
         },
         {
           name: '12"(M) BED JOINTER (SHREYA)',
-          tags: "jointer, hardware, shreya",
         },
         {
           name: '3.5"(L)BED JOINTER(SHREYA)',
-          tags: "jointer, hardware, shreya",
         },
       ])
       .run();

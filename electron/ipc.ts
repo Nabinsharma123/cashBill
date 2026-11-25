@@ -72,17 +72,15 @@ export function registerIpcHandlers() {
     return db.select().from(schema.products).orderBy(desc(schema.products.id)).all();
   });
 
-  ipcMain.handle("products:create", (_, data: { name: string; tags?: string }) => {
+  ipcMain.handle("products:create", (_, data: { name: string }) => {
     return db.insert(schema.products).values({
       name: data.name,
-      tags: data.tags || "",
     }).returning().get();
   });
 
-  ipcMain.handle("products:update", (_, id: number, data: { name: string; tags?: string }) => {
+  ipcMain.handle("products:update", (_, id: number, data: { name: string }) => {
     return db.update(schema.products).set({
       name: data.name,
-      tags: data.tags || "",
     }).where(eq(schema.products.id, id)).returning().get();
   });
 

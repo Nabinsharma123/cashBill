@@ -184,8 +184,7 @@ export const CreateInvoicePage: React.FC = () => {
       products.map((p) => ({
         value: p.id,
         label: p.name,
-        description: p.tags ? `Tags: ${p.tags}` : undefined,
-        keywords: [p.name, p.tags || ""],
+        keywords: [p.name],
       })),
     [products],
   );
@@ -783,7 +782,7 @@ export const CreateInvoicePage: React.FC = () => {
                                   }}
                                   options={productOptions}
                                   placeholder="Pick a product..."
-                                  searchPlaceholder="Search product or tags..."
+                                  searchPlaceholder="Search product..."
                                   emptyText="No product found."
                                   contentClassName="min-w-[280px]"
                                 />

@@ -38,7 +38,6 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
-      tags: "",
     },
   });
 
@@ -46,12 +45,10 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
     if (initialData) {
       reset({
         name: initialData.name,
-        tags: initialData.tags || "",
       });
     } else {
       reset({
         name: "",
-        tags: "",
       });
     }
   }, [initialData, reset, isOpen]);
@@ -92,18 +89,6 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
             {errors.name && (
               <p className="text-xs text-destructive">{errors.name.message}</p>
             )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="prod-tags">Tags (comma-separated)</Label>
-            <Input
-              id="prod-tags"
-              placeholder="e.g. jointer, hardware, shreya"
-              {...register("tags")}
-            />
-            <p className="text-xs text-muted-foreground">
-              Tags help quickly search and filter products when creating invoices.
-            </p>
           </div>
 
           <DialogFooter className="pt-4">

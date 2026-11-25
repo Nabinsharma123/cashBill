@@ -13,8 +13,8 @@ export interface ElectronAPI {
 
   // Products
   getProducts: () => Promise<any[]>;
-  createProduct: (data: { name: string; tags?: string }) => Promise<any>;
-  updateProduct: (id: number, data: { name: string; tags?: string }) => Promise<any>;
+  createProduct: (data: { name: string }) => Promise<any>;
+  updateProduct: (id: number, data: { name: string }) => Promise<any>;
   deleteProduct: (id: number) => Promise<{ success: boolean }>;
 
   // Invoices
