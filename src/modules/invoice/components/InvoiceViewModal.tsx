@@ -36,8 +36,8 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader className="flex flex-row items-center justify-between border-b pb-3 pr-6">
+      <DialogContent className="print-invoice-dialog max-w-4xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="no-print flex flex-row items-center justify-between border-b pb-3 pr-6">
           <DialogTitle className="text-lg font-bold">
             Invoice #{invoice?.invoiceNo} Preview
           </DialogTitle>
@@ -113,7 +113,7 @@ export const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
           </div>
         </DialogHeader>
 
-        <div className="py-4 bg-muted/20 rounded-md">
+        <div className="py-4 bg-muted/20 rounded-md print:p-0 print:bg-transparent print:rounded-none">
           <InvoiceDocument invoice={invoice} />
         </div>
       </DialogContent>
