@@ -25,7 +25,7 @@ function createWindow() {
       contextIsolation: true,
       sandbox: false,
     },
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
   });
 
   mainWindow.webContents.on(

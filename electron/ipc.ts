@@ -322,7 +322,6 @@ export function registerIpcHandlers() {
           printBackground: true,
           pageSize: "A4",
           margins: {
-            marginType: "custom",
             top: 0.3,
             bottom: 0.3,
             left: 0.3,
