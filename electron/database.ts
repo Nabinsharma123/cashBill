@@ -1,8 +1,10 @@
 import type Database from "better-sqlite3";
 import { count, sql } from "drizzle-orm";
 import { BetterSQLite3Database, drizzle } from "drizzle-orm/better-sqlite3";
+import { app } from "electron";
 import fs from "node:fs";
 import { createRequire } from "node:module";
+import path from "node:path";
 import * as schema from "./db/schema";
 
 const require = createRequire(import.meta.url);
@@ -10,14 +12,32 @@ const DatabaseConstructor = require("better-sqlite3");
 
 let drizzleDb: BetterSQLite3Database<typeof schema> | null = null;
 
+function resolveDatabaseFolderPath(): string {
+  if (!app.isPackaged) {
+    return path.join(process.cwd(), "database");
+  }
+
+  // Windows portable (.exe) sets PORTABLE_EXECUTABLE_DIR to the folder containing the .exe
+  if (process.env.PORTABLE_EXECUTABLE_DIR) {
+    return path.join(process.env.PORTABLE_EXECUTABLE_DIR, "database");
+  }
+
+  // Linux AppImage sets APPIMAGE to the full path of the .AppImage file
+  if (process.env.APPIMAGE) {
+    return path.join(path.dirname(process.env.APPIMAGE), "database");
+  }
+
+  return path.join(path.dirname(app.getPath("exe")), "database");
+}
+
 export function getDatabase() {
   if (drizzleDb) return;
 
-  const databaseFolderPath = `${process.cwd()}/database`;
-  const databasePath = `${databaseFolderPath}/cashbill.db`;
+  const databaseFolderPath = resolveDatabaseFolderPath();
+  const databasePath = path.join(databaseFolderPath, "cashbill.db");
 
   if (!fs.existsSync(databaseFolderPath)) {
-    fs.mkdirSync(databaseFolderPath);
+    fs.mkdirSync(databaseFolderPath, { recursive: true });
   }
 
   console.log("Opening SQLite database at:", databasePath);

@@ -4,5 +4,6 @@ database/cashbill.db-wal
 database/cashbill.db
 dist
 dist-electron
+release
 
 
