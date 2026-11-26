@@ -68,6 +68,7 @@ export const InvoiceHistoryPage: React.FC<InvoiceHistoryPageProps> = ({
         name: inv?.partyName,
         stateName: inv?.partyStateName,
       },
+      transport: inv?.transport ?? "",
       declaration: inv?.declaration,
       gstEntries: inv?.gstEntries,
       invoiceDate: inv?.invoiceDate,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,8 +17,10 @@ export default function DatePicker({
   onChange?: (date: string | undefined) => void;
   placeholder?: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant='outline'
@@ -38,7 +41,10 @@ export default function DatePicker({
         <Calendar
           mode='single'
           selected={value ? new Date(value) : undefined}
-          onSelect={date => onChange?.(date ? dayjs(date).format('YYYY-MM-DD') : undefined)}
+          onSelect={date => {
+            onChange?.(date ? dayjs(date).format('YYYY-MM-DD') : undefined);
+            setOpen(false);
+          }}
           autoFocus
         />
       </PopoverContent>

@@ -27,6 +27,7 @@ export const InvoiceDocument: React.FC<{
   const subtotal = Number(invoice.subtotal) || 0;
   const roundOff = Number(invoice.roundOff) || 0;
   const totalAmount = Number(invoice.totalAmount) || 0;
+  const transport = invoice.transport?.trim() || "";
   const declaration =
     invoice.declaration ||
     "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.";
@@ -75,9 +76,9 @@ export const InvoiceDocument: React.FC<{
             </div>
           </div>
 
-          {/* Invoice No. & Date */}
-          <div className="w-[42%] flex flex-col justify-between">
-            <div className="flex h-full">
+          {/* Invoice No., Date & Transport */}
+          <div className="w-[42%] flex flex-col">
+            <div className="flex flex-1">
               <div className="w-1/2 p-2.5 border-r border-black flex flex-col">
                 <div className="text-[11px] text-gray-600 font-medium">
                   Invoice No.
@@ -95,6 +96,16 @@ export const InvoiceDocument: React.FC<{
                 </div>
               </div>
             </div>
+            {transport && (
+              <div className="border-t border-black p-2.5 flex flex-col">
+                <div className="text-[11px] text-gray-600 font-medium">
+                  Transport
+                </div>
+                <div className="font-semibold text-[13px] mt-1 text-black">
+                  {transport}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

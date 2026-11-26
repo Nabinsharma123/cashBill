@@ -135,6 +135,7 @@ export const CreateInvoicePage: React.FC = () => {
         },
       ],
       roundOff: 0,
+      transport: "",
       declaration:
         "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.",
     },
@@ -449,7 +450,7 @@ export const CreateInvoicePage: React.FC = () => {
       gstEntries: value.gstEntries,
       roundOff: value.roundOff || 0,
       totalAmount: totalAmount || 0,
-
+      transport: value.transport?.trim() || "",
       declaration: value.declaration || "",
     };
   };
@@ -500,6 +501,7 @@ export const CreateInvoicePage: React.FC = () => {
         gstEntries: pendingSaveData.gstEntries,
         roundOff: Number(pendingSaveData.roundOff) || 0,
         totalAmount: totalAmount,
+        transport: pendingSaveData.transport?.trim() || "",
         declaration: pendingSaveData.declaration || "",
       });
 
@@ -1253,9 +1255,28 @@ export const CreateInvoicePage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* 4. Declaration */}
+        {/* 4. Transport & Declaration */}
         <Card>
-          <CardContent className="pt-4">
+          <CardContent className="pt-4 space-y-4">
+            <Controller
+              control={control}
+              name="transport"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>Transport</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      {...field}
+                      placeholder="e.g. By Road / Transport Name"
+                    />
+                    {fieldState?.invalid && (
+                      <FieldError errors={[fieldState?.error]} />
+                    )}
+                  </FieldContent>
+                </Field>
+              )}
+            />
+
             <Controller
               control={control}
               name="declaration"

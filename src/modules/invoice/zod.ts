@@ -63,6 +63,11 @@ export const invoiceFormSchema = z.object({
   taxPreset: z.nativeEnum(TaxPreset).default(TaxPreset.IGST_18),
   gstEntries: z.array(gstEntryFormSchema),
   roundOff: numberSchema("Round off"),
+  transport: z
+    .string()
+    .trim()
+    .max(200, "Transport can't be more than 200 characters long")
+    .optional(),
   declaration: stringSchema("Declaration", 1, 500),
 });
 

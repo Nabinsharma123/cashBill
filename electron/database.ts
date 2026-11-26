@@ -8,11 +8,10 @@ import * as schema from "./db/schema";
 const require = createRequire(import.meta.url);
 const DatabaseConstructor = require("better-sqlite3");
 
-let db: Database.Database | null = null;
 let drizzleDb: BetterSQLite3Database<typeof schema> | null = null;
 
-export function getDatabase(): Database.Database {
-  if (db) return db;
+export function getDatabase() {
+  if (drizzleDb) return;
 
   const databaseFolderPath = `${process.cwd()}/database`;
   const databasePath = `${databaseFolderPath}/cashbill.db`;
@@ -27,13 +26,11 @@ export function getDatabase(): Database.Database {
   instance.pragma("journal_mode = WAL");
   instance.pragma("foreign_keys = ON");
 
-  db = instance;
-  drizzleDb = drizzle(instance, { schema });
+  const db = drizzle(instance, { schema });
 
-  initTables(drizzleDb);
-  seedInitialData(drizzleDb);
-
-  return db;
+  initTables(db);
+  seedInitialData(db);
+  drizzleDb = db;
 }
 
 export function getDrizzleDb(): BetterSQLite3Database<typeof schema> {
@@ -101,6 +98,7 @@ function initTables(drizzleDb: BetterSQLite3Database<typeof schema>) {
       gst_entries_json TEXT NOT NULL,
       round_off REAL DEFAULT 0.0,
       total_amount REAL NOT NULL,
+      transport TEXT,
       declaration TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );

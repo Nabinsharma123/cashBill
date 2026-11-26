@@ -272,6 +272,7 @@ export function registerIpcHandlers() {
             : [],
           roundOff: toFiniteNumber(invoice.roundOff),
           totalAmount: toFiniteNumber(invoice.totalAmount),
+          transport: invoice.transport ?? "",
           declaration: invoice.declaration ?? "",
         })
         .returning()

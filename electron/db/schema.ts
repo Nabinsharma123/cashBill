@@ -62,6 +62,7 @@ export const invoices = sqliteTable("invoices", {
   gstEntries: text("gst_entries_json", { mode: "json" }).$type<any[]>().notNull(),
   roundOff: real("round_off").default(0.0),
   totalAmount: real("total_amount").notNull(),
+  transport: text("transport"),
   declaration: text("declaration"),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
