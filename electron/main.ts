@@ -16,8 +16,14 @@ process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
+  const windowIcon = path.join(
+    process.env.VITE_PUBLIC || RENDERER_DIST,
+    process.platform === "win32" ? "icon.ico" : "icon.png",
+  );
+
   mainWindow = new BrowserWindow({
     title: "Biswakarma Engg",
+    icon: windowIcon,
     fullscreenable: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),

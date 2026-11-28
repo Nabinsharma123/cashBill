@@ -67,10 +67,10 @@
 
 
 
-/* Print Specific Rules for Precision A4 Output */
+/* Print Specific Rules */
 @media print {
   @page {
-    size: A4 portrait;
+    size: auto;
     margin: 8mm;
   }
   html,

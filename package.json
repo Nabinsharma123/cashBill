@@ -1,8 +1,8 @@
 {
   "name": "cashbill",
   "version": "1.0.0",
-  "description": "Manufacturing Invoice Generation Desktop App",
-  "author": "Biswakarma Engg",
+  "description": "Invoice Generator",
+  "author": "",
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {

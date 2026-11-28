@@ -358,6 +358,7 @@ export function registerIpcHandlers() {
         {
           silent: false,
           printBackground: true,
+          usePrinterDefaultPageSize: true,
         },
         (success, failureReason) => {
           if (success) {
