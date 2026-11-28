@@ -12,7 +12,7 @@ asarUnpack:
 linux:
   target:
     - AppImage
-  icon: public/linux
+  icon: public/icon.png
   category: Office
 win:
   target:
@@ -21,4 +21,4 @@ win:
 mac:
   icon: public/icon.icns
 portable:
-  artifactName: ${productName}-${version}-portable.${ext}
+  artifactName: ${productName}-${version}.${ext}

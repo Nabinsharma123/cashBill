@@ -1,5 +1,7 @@
 {
   "name": "cashbill",
+  "productName": "CashBill",
+  "desktopName": "cashbill.desktop",
   "version": "1.0.0",
   "description": "Invoice Generator",
   "author": "",
