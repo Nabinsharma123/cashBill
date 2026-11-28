@@ -51,7 +51,7 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
       reset({
         name: initialData.name,
         address: initialData.address,
-        gstin: initialData.gstin,
+        gstin: initialData.gstin ?? "",
         stateName: initialData.stateName,
       });
     } else {
@@ -124,11 +124,10 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="comp-gstin">GSTIN/UIN (15 chars) *</Label>
+              <Label htmlFor="comp-gstin">GSTIN/UIN</Label>
               <Input
                 id="comp-gstin"
                 placeholder="19AZPPS2562R1Z6"
-                maxLength={15}
                 {...register("gstin")}
                 onChange={handleGstinChange}
               />

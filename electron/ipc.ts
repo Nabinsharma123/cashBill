@@ -26,14 +26,14 @@ export function registerIpcHandlers() {
     "companies:create",
     (
       _,
-      data: { name: string; address: string; gstin: string; stateName: string },
+      data: { name: string; address: string; gstin?: string; stateName: string },
     ) => {
       return db
         .insert(schema.companies)
         .values({
           name: data.name,
           address: data.address,
-          gstin: data.gstin,
+          gstin: data.gstin ?? "",
           stateName: data.stateName,
         })
         .returning()
@@ -46,14 +46,14 @@ export function registerIpcHandlers() {
     (
       _,
       id: number,
-      data: { name: string; address: string; gstin: string; stateName: string },
+      data: { name: string; address: string; gstin?: string; stateName: string },
     ) => {
       const updated = db
         .update(schema.companies)
         .set({
           name: data.name,
           address: data.address,
-          gstin: data.gstin,
+          gstin: data.gstin ?? "",
           stateName: data.stateName,
         })
         .where(eq(schema.companies.id, id))
@@ -88,14 +88,14 @@ export function registerIpcHandlers() {
     "parties:create",
     (
       _,
-      data: { name: string; address: string; gstin: string; stateName: string },
+      data: { name: string; address: string; gstin?: string; stateName: string },
     ) => {
       return db
         .insert(schema.parties)
         .values({
           name: data.name,
           address: data.address,
-          gstin: data.gstin,
+          gstin: data.gstin ?? "",
           stateName: data.stateName,
         })
         .returning()
@@ -108,14 +108,14 @@ export function registerIpcHandlers() {
     (
       _,
       id: number,
-      data: { name: string; address: string; gstin: string; stateName: string },
+      data: { name: string; address: string; gstin?: string; stateName: string },
     ) => {
       const updated = db
         .update(schema.parties)
         .set({
           name: data.name,
           address: data.address,
-          gstin: data.gstin,
+          gstin: data.gstin ?? "",
           stateName: data.stateName,
         })
         .where(eq(schema.parties.id, id))
@@ -259,11 +259,11 @@ export function registerIpcHandlers() {
           partyId: invoice.partyId ?? null,
           companyName: invoice.companyName,
           companyAddress: invoice.companyAddress,
-          companyGstin: invoice.companyGstin,
+          companyGstin: invoice.companyGstin ?? "",
           companyStateName: invoice.companyStateName,
           partyName: invoice.partyName,
           partyAddress: invoice.partyAddress,
-          partyGstin: invoice.partyGstin,
+          partyGstin: invoice.partyGstin ?? "",
           partyStateName: invoice.partyStateName,
           items: Array.isArray(invoice.items) ? invoice.items : [],
           subtotal: toFiniteNumber(invoice.subtotal),

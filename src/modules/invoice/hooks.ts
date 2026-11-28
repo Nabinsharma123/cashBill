@@ -48,7 +48,10 @@ export const useGetAllInvoices = () => {
     queryKey: [InvoiceQueryKeysEnum.getAllInvoices],
     queryFn: async (): Promise<TInvoiceSchema["Doc"][]> => {
       if (window.electronAPI) {
-        const res = await window.electronAPI.getInvoices({ page: 1, limit: 10000 });
+        const res = await window.electronAPI.getInvoices({
+          page: 1,
+          limit: 10000,
+        });
         if (Array.isArray(res)) return res;
         return res?.data || [];
       }
@@ -72,7 +75,9 @@ export const useCreateInvoice = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: [InvoiceQueryKeysEnum.createInvoice],
-    mutationFn: async (payload: TInvoiceSchema["CreatePayload"]): Promise<TInvoiceSchema["Doc"]> => {
+    mutationFn: async (
+      payload: TInvoiceSchema["CreatePayload"],
+    ): Promise<TInvoiceSchema["Doc"]> => {
       if (!window.electronAPI) throw new Error("Electron API not available");
       const res = await window.electronAPI.createInvoice(payload);
       return res;

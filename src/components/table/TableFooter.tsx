@@ -1,12 +1,14 @@
-import React from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useMemo } from "react";
 import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -28,6 +30,52 @@ export type TableFooterProps = {
   previousPageEnable: boolean;
 };
 
+function getPaginationItems(
+  currentPage: number,
+  totalPage: number,
+): Array<number | "ellipsis"> {
+  const total = Math.max(1, totalPage);
+  const current = Math.min(Math.max(1, currentPage), total);
+
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const leftSibling = Math.max(2, current - 1);
+  const rightSibling = Math.min(total - 1, current + 1);
+  const showLeftEllipsis = leftSibling > 3;
+  const showRightEllipsis = rightSibling < total - 2;
+
+  if (!showLeftEllipsis && showRightEllipsis) {
+    const leftEnd = Math.max(3, rightSibling);
+    return [
+      ...Array.from({ length: leftEnd }, (_, i) => i + 1),
+      "ellipsis",
+      total,
+    ];
+  }
+
+  if (showLeftEllipsis && !showRightEllipsis) {
+    const rightStart = Math.min(total - 2, leftSibling);
+    return [
+      1,
+      "ellipsis",
+      ...Array.from({ length: total - rightStart + 1 }, (_, i) => rightStart + i),
+    ];
+  }
+
+  return [
+    1,
+    "ellipsis",
+    ...Array.from(
+      { length: rightSibling - leftSibling + 1 },
+      (_, i) => leftSibling + i,
+    ),
+    "ellipsis",
+    total,
+  ];
+}
+
 export const TableFooter: React.FC<TableFooterProps> = ({
   onPageChange,
   onPageSizeChange,
@@ -40,6 +88,11 @@ export const TableFooter: React.FC<TableFooterProps> = ({
   nextPageEnable,
   previousPageEnable,
 }) => {
+  const paginationItems = useMemo(
+    () => getPaginationItems(currentPage, totalPage),
+    [currentPage, totalPage],
+  );
+
   return (
     <div className="w-full border-t pt-4">
       <div className="flex w-full flex-col sm:flex-row items-center gap-4 justify-between px-2 text-xs text-muted-foreground">
@@ -73,69 +126,43 @@ export const TableFooter: React.FC<TableFooterProps> = ({
           )}
         </div>
 
-        {/* Right: Page numbers and controls */}
-        <div className="flex items-center gap-4">
-          <div className="text-xs font-medium">
-            Page {currentPage} of {Math.max(1, totalPage)}
-          </div>
-          <div className="flex items-center gap-1">
-            {/* Go to First Page */}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 p-0"
-              onClick={() => onPageChange(1)}
-              disabled={!previousPageEnable}
-              title="Go to first page"
-            >
-              <span className="sr-only">Go to first page</span>
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
+        {/* Right: Numbered pagination controls */}
+        <Pagination className="mx-0 w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => onPreviousPage()}
+                disabled={!previousPageEnable}
+                title="Go to previous page"
+              />
+            </PaginationItem>
 
-            {/* Previous Page */}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 p-0"
-              onClick={() => onPreviousPage()}
-              disabled={!previousPageEnable}
-              title="Go to previous page"
-            >
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+            {paginationItems.map((item, idx) =>
+              item === "ellipsis" ? (
+                <PaginationItem key={`ellipsis-${idx}`}>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              ) : (
+                <PaginationItem key={item}>
+                  <PaginationLink
+                    isActive={item === currentPage}
+                    onClick={() => onPageChange(item)}
+                  >
+                    {item}
+                  </PaginationLink>
+                </PaginationItem>
+              ),
+            )}
 
-            {/* Next Page */}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 p-0"
-              onClick={() => onNextPage()}
-              disabled={!nextPageEnable}
-              title="Go to next page"
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-
-            {/* Go to Last Page */}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 p-0"
-              onClick={() => onPageChange(totalPage)}
-              disabled={!nextPageEnable}
-              title="Go to last page"
-            >
-              <span className="sr-only">Go to last page</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => onNextPage()}
+                disabled={!nextPageEnable}
+                title="Go to next page"
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

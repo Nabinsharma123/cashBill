@@ -161,23 +161,29 @@ export const CreateInvoicePage: React.FC = () => {
 
   const companyOptions: ComboboxOption[] = useMemo(
     () =>
-      companies.map((c) => ({
-        value: c.id,
-        label: `${c.name} (${c.gstin.slice(0, 2)})`,
-        description: `GSTIN: ${c.gstin} | ${c.stateName}`,
-        keywords: [c.name, c.gstin, c.stateName, c.address],
-      })),
+      companies.map((c) => {
+        const gstin = c.gstin?.trim();
+        return {
+          value: c.id,
+          label: gstin ? `${c.name} (${gstin.slice(0, 2)})` : c.name,
+          description: gstin ? `GSTIN: ${gstin} | ${c.stateName}` : c.stateName,
+          keywords: [c.name, gstin || "", c.stateName, c.address].filter(Boolean),
+        };
+      }),
     [companies],
   );
 
   const partyOptions: ComboboxOption[] = useMemo(
     () =>
-      parties.map((p) => ({
-        value: p.id,
-        label: `${p.name} (${p.gstin.slice(0, 2)})`,
-        description: `GSTIN: ${p.gstin} | ${p.stateName}`,
-        keywords: [p.name, p.gstin, p.stateName, p.address],
-      })),
+      parties.map((p) => {
+        const gstin = p.gstin?.trim();
+        return {
+          value: p.id,
+          label: gstin ? `${p.name} (${gstin.slice(0, 2)})` : p.name,
+          description: gstin ? `GSTIN: ${gstin} | ${p.stateName}` : p.stateName,
+          keywords: [p.name, gstin || "", p.stateName, p.address].filter(Boolean),
+        };
+      }),
     [parties],
   );
 
@@ -482,11 +488,11 @@ export const CreateInvoicePage: React.FC = () => {
         partyId: pendingSaveData.party?.id,
         companyName: pendingSaveData.company?.name,
         companyAddress: pendingSaveData.company?.address,
-        companyGstin: pendingSaveData.company?.gstin,
+        companyGstin: pendingSaveData.company?.gstin || "",
         companyStateName: pendingSaveData.company?.stateName,
         partyName: pendingSaveData.party?.name,
         partyAddress: pendingSaveData.party?.address,
-        partyGstin: pendingSaveData.party?.gstin,
+        partyGstin: pendingSaveData.party?.gstin || "",
         partyStateName: pendingSaveData.party?.stateName,
         items: (pendingSaveData?.items || [])?.map((item) => ({
           amount: item?.amount,
@@ -681,7 +687,9 @@ export const CreateInvoicePage: React.FC = () => {
                     </div>
                     <div>{watchedSelectedCompany?.address}</div>
                     <div>
-                      GSTIN: {watchedSelectedCompany?.gstin} |{" "}
+                      {watchedSelectedCompany?.gstin
+                        ? `GSTIN: ${watchedSelectedCompany.gstin} | `
+                        : ""}
                       {watchedSelectedCompany?.stateName}
                     </div>
                   </div>
@@ -738,7 +746,9 @@ export const CreateInvoicePage: React.FC = () => {
                     </div>
                     <div>{watchedSelectedParty?.address}</div>
                     <div>
-                      GSTIN: {watchedSelectedParty?.gstin} |{" "}
+                      {watchedSelectedParty?.gstin
+                        ? `GSTIN: ${watchedSelectedParty.gstin} | `
+                        : ""}
                       {watchedSelectedParty?.stateName}
                     </div>
                   </div>

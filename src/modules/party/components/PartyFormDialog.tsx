@@ -51,7 +51,7 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
       reset({
         name: initialData.name,
         address: initialData.address,
-        gstin: initialData.gstin,
+        gstin: initialData.gstin ?? "",
         stateName: initialData.stateName,
       });
     } else {
@@ -124,11 +124,10 @@ export const PartyFormDialog: React.FC<PartyFormDialogProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="party-gstin">GSTIN/UIN (15 chars) *</Label>
+              <Label htmlFor="party-gstin">GSTIN/UIN</Label>
               <Input
                 id="party-gstin"
                 placeholder="20AMIPA4645F1ZN"
-                maxLength={15}
                 {...register("gstin")}
                 onChange={handleGstinChange}
               />

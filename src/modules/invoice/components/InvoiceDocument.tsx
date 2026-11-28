@@ -14,12 +14,12 @@ export const InvoiceDocument: React.FC<{
 
   const companyName = invoice.company?.name || "";
   const companyAddress = invoice.company?.address || "";
-  const companyGstin = invoice.company?.gstin || "";
+  const companyGstin = invoice.company?.gstin?.trim() || "";
   const companyState = invoice.company?.stateName || "";
 
   const partyName = invoice.party?.name || "";
   const partyAddress = invoice.party?.address || "";
-  const partyGstin = invoice.party?.gstin || "";
+  const partyGstin = invoice.party?.gstin?.trim() || "";
   const partyState = invoice.party?.stateName || "";
 
   const items = invoice.items || [];
@@ -61,12 +61,14 @@ export const InvoiceDocument: React.FC<{
               </div>
             </div>
             <div className="mt-2 text-[12.5px] space-y-0.5">
-              <div>
-                <span className="font-semibold inline-block w-24">
-                  GSTIN/UIN
-                </span>
-                : <span className="font-medium">{companyGstin}</span>
-              </div>
+              {companyGstin && (
+                <div>
+                  <span className="font-semibold inline-block w-24">
+                    GSTIN/UIN
+                  </span>
+                  : <span className="font-medium">{companyGstin}</span>
+                </div>
+              )}
               <div>
                 <span className="font-semibold inline-block w-24">
                   State Name
@@ -121,10 +123,12 @@ export const InvoiceDocument: React.FC<{
             {partyAddress}
           </div>
           <div className="mt-2 text-[12.5px] flex flex-col gap-0.5">
-            <div>
-              <span className="font-semibold inline-block w-24">GSTIN/UIN</span>
-              : <span className="font-medium">{partyGstin}</span>
-            </div>
+            {partyGstin && (
+              <div>
+                <span className="font-semibold inline-block w-24">GSTIN/UIN</span>
+                : <span className="font-medium">{partyGstin}</span>
+              </div>
+            )}
             <div>
               <span className="font-semibold inline-block w-24">
                 State Name

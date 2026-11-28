@@ -39,7 +39,7 @@ export const CompanyListPage: React.FC = () => {
   const filteredCompanies = companies.filter(
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.gstin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.gstin || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.stateName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -137,7 +137,7 @@ export const CompanyListPage: React.FC = () => {
                       {c.name}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {c.gstin}
+                      {c.gstin || "—"}
                     </TableCell>
                     <TableCell>{c.stateName}</TableCell>
                     <TableCell

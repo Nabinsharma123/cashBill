@@ -4,7 +4,7 @@ export interface ElectronAPI {
   createCompany: (data: {
     name: string;
     address: string;
-    gstin: string;
+    gstin?: string;
     stateName?: string;
     state_name?: string;
   }) => Promise<any>;
@@ -13,7 +13,7 @@ export interface ElectronAPI {
     data: {
       name: string;
       address: string;
-      gstin: string;
+      gstin?: string;
       stateName?: string;
       state_name?: string;
     },
@@ -25,7 +25,7 @@ export interface ElectronAPI {
   createParty: (data: {
     name: string;
     address: string;
-    gstin: string;
+    gstin?: string;
     stateName?: string;
     state_name?: string;
   }) => Promise<any>;
@@ -34,7 +34,7 @@ export interface ElectronAPI {
     data: {
       name: string;
       address: string;
-      gstin: string;
+      gstin?: string;
       stateName?: string;
       state_name?: string;
     },

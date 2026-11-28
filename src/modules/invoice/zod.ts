@@ -39,7 +39,7 @@ export const invoiceFormSchema = z.object({
       id: numberSchema("Company"),
       name: stringSchema("Company name"),
       address: stringSchema("Company address"),
-      gstin: stringSchema("Company GSTIN", 1, 50),
+      gstin: z.string().trim().optional(),
       stateName: stringSchema("Company state", 1, 100),
     },
     {
@@ -52,7 +52,7 @@ export const invoiceFormSchema = z.object({
       id: numberSchema("Party"),
       name: stringSchema("Party name"),
       address: stringSchema("Party address"),
-      gstin: stringSchema("Party GSTIN", 1, 50),
+      gstin: z.string().trim().optional(),
       stateName: stringSchema("Party state", 1, 100),
     },
     {

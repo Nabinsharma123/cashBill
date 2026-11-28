@@ -3,7 +3,7 @@ export type TPartySchema = {
     id: number;
     name: string;
     address: string;
-    gstin: string;
+    gstin?: string;
     stateName: string;
     createdAt?: string;
   };
@@ -11,14 +11,14 @@ export type TPartySchema = {
   CreatePayload: {
     name: string;
     address: string;
-    gstin: string;
+    gstin?: string;
     stateName: string;
   };
 
   UpdatePayload: {
     name: string;
     address: string;
-    gstin: string;
+    gstin?: string;
     stateName: string;
   };
 };

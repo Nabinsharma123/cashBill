@@ -39,7 +39,7 @@ export const PartyListPage: React.FC = () => {
   const filteredParties = parties.filter(
     (p) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.gstin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.gstin || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.stateName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -137,7 +137,7 @@ export const PartyListPage: React.FC = () => {
                       {p.name}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {p.gstin}
+                      {p.gstin || "—"}
                     </TableCell>
                     <TableCell>{p.stateName}</TableCell>
                     <TableCell

@@ -10,11 +10,11 @@ export type TInvoiceSchema = {
     partyId: number;
     companyName: string;
     companyAddress: string;
-    companyGstin: string;
+    companyGstin?: string;
     companyStateName: string;
     partyName: string;
     partyAddress: string;
-    partyGstin: string;
+    partyGstin?: string;
     partyStateName: string;
     items: TInvoiceSchema["Item"][];
     subtotal: number;
@@ -36,14 +36,14 @@ export type TInvoiceSchema = {
       id: number;
       name: string;
       address: string;
-      gstin: string;
+      gstin?: string;
       stateName: string;
     };
     party: {
       id: number;
       name: string;
       address: string;
-      gstin: string;
+      gstin?: string;
       stateName: string;
     };
     items: {
@@ -94,11 +94,11 @@ export type TInvoiceSchema = {
     partyId: number;
     companyName: string;
     companyAddress: string;
-    companyGstin: string;
+    companyGstin?: string;
     companyStateName: string;
     partyName: string;
     partyAddress: string;
-    partyGstin: string;
+    partyGstin?: string;
     partyStateName: string;
     items: TInvoiceSchema["Item"][];
     subtotal: number;
