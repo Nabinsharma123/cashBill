@@ -167,7 +167,9 @@ export const CreateInvoicePage: React.FC = () => {
           value: c.id,
           label: gstin ? `${c.name} (${gstin.slice(0, 2)})` : c.name,
           description: gstin ? `GSTIN: ${gstin} | ${c.stateName}` : c.stateName,
-          keywords: [c.name, gstin || "", c.stateName, c.address].filter(Boolean),
+          keywords: [c.name, gstin || "", c.stateName, c.address].filter(
+            Boolean,
+          ),
         };
       }),
     [companies],
@@ -181,7 +183,9 @@ export const CreateInvoicePage: React.FC = () => {
           value: p.id,
           label: gstin ? `${p.name} (${gstin.slice(0, 2)})` : p.name,
           description: gstin ? `GSTIN: ${gstin} | ${p.stateName}` : p.stateName,
-          keywords: [p.name, gstin || "", p.stateName, p.address].filter(Boolean),
+          keywords: [p.name, gstin || "", p.stateName, p.address].filter(
+            Boolean,
+          ),
         };
       }),
     [parties],
@@ -602,11 +606,7 @@ export const CreateInvoicePage: React.FC = () => {
                   <Field>
                     <FieldLabel required>Invoice No.</FieldLabel>
                     <FieldContent>
-                      <Input
-                        onFocus={(e) => e.target.select()}
-                        {...field}
-                        placeholder="e.g. BI/2024/25/001"
-                      />
+                      <Input onFocus={(e) => e.target.select()} {...field} />
                       {fieldState?.invalid && (
                         <FieldError errors={[fieldState?.error]} />
                       )}
@@ -1275,10 +1275,7 @@ export const CreateInvoicePage: React.FC = () => {
                 <Field>
                   <FieldLabel>Transport</FieldLabel>
                   <FieldContent>
-                    <Input
-                      {...field}
-                      placeholder="e.g. By Road / Transport Name"
-                    />
+                    <Input {...field} />
                     {fieldState?.invalid && (
                       <FieldError errors={[fieldState?.error]} />
                     )}

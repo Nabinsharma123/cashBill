@@ -81,11 +81,7 @@ export const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
         <form className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="prod-name">Product Name / Description *</Label>
-            <Input
-              id="prod-name"
-              placeholder='e.g. 8" BED JOINTER(SHREYA)'
-              {...register("name")}
-            />
+            <Input id="prod-name" {...register("name")} />
             {errors.name && (
               <p className="text-xs text-destructive">{errors.name.message}</p>
             )}

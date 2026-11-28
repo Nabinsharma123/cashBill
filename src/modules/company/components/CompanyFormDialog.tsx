@@ -97,11 +97,7 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
         <form className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="comp-name">Company Name *</Label>
-            <Input
-              id="comp-name"
-              placeholder="e.g. Biswakarma Engg Co - 24-25"
-              {...register("name")}
-            />
+            <Input id="comp-name" {...register("name")} />
             {errors.name && (
               <p className="text-xs text-destructive">{errors.name.message}</p>
             )}
@@ -109,12 +105,7 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
 
           <div className="space-y-1.5">
             <Label htmlFor="comp-address">Address *</Label>
-            <Textarea
-              id="comp-address"
-              placeholder="e.g. 1/1 E Road Bamungachi Howrah-05"
-              rows={3}
-              {...register("address")}
-            />
+            <Textarea id="comp-address" rows={3} {...register("address")} />
             {errors.address && (
               <p className="text-xs text-destructive">
                 {errors.address.message}
@@ -127,7 +118,6 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
               <Label htmlFor="comp-gstin">GSTIN/UIN</Label>
               <Input
                 id="comp-gstin"
-                placeholder="19AZPPS2562R1Z6"
                 {...register("gstin")}
                 onChange={handleGstinChange}
               />
@@ -140,11 +130,7 @@ export const CompanyFormDialog: React.FC<CompanyFormDialogProps> = ({
 
             <div className="space-y-1.5">
               <Label htmlFor="comp-state">State Name & Code *</Label>
-              <Input
-                id="comp-state"
-                placeholder="e.g. West Bengal, Code : 19"
-                {...register("stateName")}
-              />
+              <Input id="comp-state" {...register("stateName")} />
               {errors.stateName && (
                 <p className="text-xs text-destructive">
                   {errors.stateName.message}
